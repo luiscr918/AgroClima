@@ -1,10 +1,11 @@
 
-import NavBar from './components/NavBar';
-import Footer from './components/Footer';
+
 import { motion } from 'framer-motion';
 import { Sun, CloudRain, Leaf } from 'lucide-react';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import NavBar from '../components/NavBar';
+import Footer from '../components/Footer';
 
 function FeatureCard({ title, desc, icon: Icon, color }: { title: string; desc: string; icon: any; color?: string }) {
 	return (

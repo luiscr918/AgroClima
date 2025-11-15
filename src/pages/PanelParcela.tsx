@@ -2,8 +2,9 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Cloud, Droplets, Wind, Sun, AlertCircle, Leaf, ArrowLeft } from 'lucide-react';
 import { motion } from 'framer-motion';
-import NavBar from './components/NavBar';
-import Footer from './components/Footer';
+import NavBar from '../components/NavBar';
+import Footer from '../components/Footer';
+
 
 export default function PanelParcela() {
   const { id } = useParams();

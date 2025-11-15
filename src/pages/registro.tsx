@@ -2,8 +2,9 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Eye, EyeOff, Mail, Lock, User, Check } from 'lucide-react';
 import { motion } from 'framer-motion';
-import NavBar from './components/NavBar';
-import Footer from './components/Footer';
+import NavBar from '../components/NavBar';
+import Footer from '../components/Footer';
+
 
 export default function Registro() {
   const [nombre, setNombre] = useState('');

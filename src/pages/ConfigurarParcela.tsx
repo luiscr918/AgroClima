@@ -1,9 +1,10 @@
 import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { MapPin, Search } from 'lucide-react';
-import NavBar from './components/NavBar';
-import Footer from './components/Footer';
+
 import { motion } from 'framer-motion';
+import NavBar from '../components/NavBar';
+import Footer from '../components/Footer';
 
 export default function ConfigurarParcela() {
   const [nombre, setNombre] = useState('');
