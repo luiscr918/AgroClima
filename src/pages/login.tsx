@@ -2,9 +2,12 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Eye, EyeOff, Mail, Lock } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { AxiosError } from 'axios';
 import NavBar from '../components/NavBar';
 import Footer from '../components/Footer';
 
+import type { AuthRequest } from '../models/AuthRequest';
+import { useAuth } from '../context/useAuth';
 
 export default function IniciarSesion() {
   const [email, setEmail] = useState('');
@@ -14,24 +17,30 @@ export default function IniciarSesion() {
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
+  const { login } = useAuth(); // usar context para login global
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError('');
     setCargando(true);
 
     try {
-      // Simulación de autenticación
-      if (email && password.length >= 6) {
-        // Guardar en localStorage (para demo)
-        localStorage.setItem('user', JSON.stringify({ email, name: email.split('@')[0] }));
-        setTimeout(() => {
-          navigate('/');
-        }, 800);
+      const credentials: AuthRequest = { email, password };
+      await login(credentials); // llama a tu authService y guarda token/usuario
+
+      // Redirección según rol (ejemplo)
+      const usuario = JSON.parse(localStorage.getItem('usuario') || '{}');
+      if (usuario.rol === "AGRICULTOR") {
+        navigate('/dashboard/agricultor');
+      } else if (usuario.rolId === "ADMIN") {
+        navigate('/dashboard/admin');
       } else {
-        setError('Email o contraseña inválidos');
+        navigate('/'); // cliente u otro rol
       }
-    } catch (err) {
-      setError('Error al iniciar sesión. Intenta de nuevo.');
+    } catch (err: unknown) {
+      console.error(err);
+      const axiosError = err as AxiosError<{ error: string }>;
+      setError(axiosError.response?.data?.error || 'Email o contraseña inválidos');
     } finally {
       setCargando(false);
     }
@@ -47,7 +56,6 @@ export default function IniciarSesion() {
           animate={{ opacity: 1, scale: 1 }}
           className="w-full max-w-md"
         >
-          {/* Card principal */}
           <div className="bg-white rounded-2xl shadow-xl p-8 mb-6">
             <div className="text-center mb-8">
               <h1 className="text-3xl font-bold text-green-800">AgroClima</h1>
@@ -63,9 +71,7 @@ export default function IniciarSesion() {
             <form onSubmit={handleSubmit} className="space-y-4">
               {/* Email */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Email
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
                 <div className="relative">
                   <Mail className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
                   <input
@@ -81,9 +87,7 @@ export default function IniciarSesion() {
 
               {/* Password */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Contraseña
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Contraseña</label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
                   <input
@@ -104,7 +108,6 @@ export default function IniciarSesion() {
                 </div>
               </div>
 
-              {/* Botón Iniciar Sesión */}
               <button
                 type="submit"
                 disabled={cargando}
@@ -114,7 +117,6 @@ export default function IniciarSesion() {
               </button>
             </form>
 
-            {/* Links adicionales */}
             <div className="mt-6 text-center space-y-2">
               <p className="text-sm text-gray-600">
                 ¿No tienes cuenta?{' '}
@@ -126,13 +128,6 @@ export default function IniciarSesion() {
                 ¿Olvidaste tu contraseña?
               </button>
             </div>
-          </div>
-
-          {/* Demo info */}
-          <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
-            <p className="text-xs text-blue-800">
-              <strong>Para demo:</strong> Usa cualquier email y contraseña con 6+ caracteres
-            </p>
           </div>
         </motion.div>
       </main>
