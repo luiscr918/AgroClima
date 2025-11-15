@@ -104,23 +104,23 @@ export default function ConfigurarParcela() {
               <MapPin className="w-6 h-6 text-green-700" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold text-green-800">Configura tu Parcela</h1>
+              <h1 className="text-3xl font-bold text-green-800">Configura tu Terreno</h1>
               <p className="text-sm text-gray-600">Define la ubicación y datos básicos para obtener recomendaciones personalizadas</p>
             </div>
           </div>
 
           <form onSubmit={submit} className="space-y-5">
-            {/* Nombre de la parcela */}
+            {/* Nombre del terreno */}
             <div>
               <label htmlFor="nombre" className="block text-sm font-medium text-gray-700 mb-2">
-                Nombre de la Parcela *
+                Nombre del Terreno *
               </label>
               <input
                 id="nombre"
                 type="text"
                 value={nombre}
                 onChange={(e) => setNombre(e.target.value)}
-                placeholder="ej. Parcela Norte, Campo A, Viñedo Principal"
+                placeholder="ej. Terreno Norte, Campo A, Viñedo Principal"
                 className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent transition"
                 required
               />
@@ -177,10 +177,10 @@ export default function ConfigurarParcela() {
               )}
             </div>
 
-            {/* Área de la parcela */}
+            {/* Área del terreno */}
             <div>
               <label htmlFor="area" className="block text-sm font-medium text-gray-700 mb-2">
-                Área de la Parcela (hectáreas)
+                Área del Terreno (hectáreas)
               </label>
               <input
                 id="area"
@@ -202,7 +202,7 @@ export default function ConfigurarParcela() {
                 disabled={cargando || !lat || !lon}
                 className="flex-1 px-6 py-3 bg-green-700 text-white rounded-lg font-medium hover:bg-green-800 disabled:bg-gray-400 transition shadow-md"
               >
-                {cargando ? 'Creando parcela...' : 'Crear Parcela'}
+                {cargando ? 'Creando terreno...' : 'Crear Terreno'}
               </button>
               <button
                 type="button"
@@ -224,7 +224,7 @@ export default function ConfigurarParcela() {
 
           <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
             <p className="text-xs text-blue-800">
-              <strong>💡 Consejo:</strong> La ubicación se obtiene usando mapas de OpenStreetMap. Selecciona el resultado más cercano a tu parcela para mayor precisión en los pronósticos.
+              <strong>💡 Consejo:</strong> La ubicación se obtiene usando mapas de OpenStreetMap. Selecciona el resultado más cercano a tu terreno para mayor precisión en los pronósticos.
             </p>
           </div>
         </motion.div>

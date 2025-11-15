@@ -9,7 +9,7 @@ import Footer from '../components/Footer';
 export default function PanelParcela() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [parcela, setParcela] = useState<any>(null);
+  const [terreno, setTerreno] = useState<any>(null);
   const [clima, setClima] = useState<any>(null);
   const [recomendaciones, setRecomendaciones] = useState<any>(null);
   const [cargandoReco, setCargandoReco] = useState(false);
@@ -18,14 +18,13 @@ export default function PanelParcela() {
   useEffect(() => {
     if (!id) return;
 
-    Promise.all([
-      fetch(`/api/fields/${id}`).then((r) => r.json()),
-    ])
-      .then(([parcela_data]) => {
-        setParcela(parcela_data);
-        // Obtener clima con coordenadas de la parcela
-        if (parcela_data.lat && parcela_data.lon) {
-          fetch(`/api/weather?lat=${parcela_data.lat}&lon=${parcela_data.lon}`)
+    fetch(`/api/fields/${id}`)
+      .then((r) => r.json())
+      .then((terreno_data) => {
+        setTerreno(terreno_data);
+        // Obtener clima con coordenadas del terreno
+        if (terreno_data.lat && terreno_data.lon) {
+          fetch(`/api/weather?lat=${terreno_data.lat}&lon=${terreno_data.lon}`)
             .then((r) => r.json())
             .then(setClima)
             .catch(console.error);
@@ -57,7 +56,7 @@ export default function PanelParcela() {
         <main className="grow flex items-center justify-center">
           <div className="text-center">
             <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-green-700 mb-4"></div>
-            <p className="text-gray-600">Cargando parcela...</p>
+            <p className="text-gray-600">Cargando terreno...</p>
           </div>
         </main>
         <Footer />
@@ -65,14 +64,14 @@ export default function PanelParcela() {
     );
   }
 
-  if (!parcela) {
+  if (!terreno) {
     return (
       <div className="min-h-screen flex flex-col bg-linear-to-b from-green-50 to-green-100">
         <NavBar />
         <main className="grow flex items-center justify-center">
           <div className="text-center">
             <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
-            <p className="text-gray-600 mb-4">Parcela no encontrada</p>
+            <p className="text-gray-600 mb-4">Terreno no encontrado</p>
             <button
               onClick={() => navigate('/')}
               className="px-4 py-2 bg-green-700 text-white rounded-lg hover:bg-green-800"
@@ -109,10 +108,10 @@ export default function PanelParcela() {
           </button>
 
           <div className="bg-white rounded-2xl p-6 shadow-lg">
-            <h1 className="text-4xl font-bold text-green-800">{parcela.name}</h1>
-            <p className="text-gray-600 mt-2">📍 {parcela.lat?.toFixed(4)}, {parcela.lon?.toFixed(4)}</p>
-            {parcela.area && <p className="text-gray-600">📐 Área: {parcela.area} ha</p>}
-            <p className="text-xs text-gray-500 mt-3">Creada: {new Date(parcela.createdAt).toLocaleDateString('es-ES')}</p>
+            <h1 className="text-4xl font-bold text-green-800">{terreno.name}</h1>
+            <p className="text-gray-600 mt-2">📍 {terreno.lat?.toFixed(4)}, {terreno.lon?.toFixed(4)}</p>
+            {terreno.area && <p className="text-gray-600">📐 Área: {terreno.area} ha</p>}
+            <p className="text-xs text-gray-500 mt-3">Creada: {new Date(terreno.createdAt).toLocaleDateString('es-ES')}</p>
           </div>
         </motion.div>
 

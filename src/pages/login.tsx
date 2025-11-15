@@ -2,12 +2,8 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Eye, EyeOff, Mail, Lock } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { AxiosError } from 'axios';
 import NavBar from '../components/NavBar';
 import Footer from '../components/Footer';
-
-import type { AuthRequest } from '../models/AuthRequest';
-import { useAuth } from '../context/useAuth';
 
 export default function IniciarSesion() {
   const [email, setEmail] = useState('');
@@ -17,30 +13,43 @@ export default function IniciarSesion() {
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
-  const { login } = useAuth(); // usar context para login global
-
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError('');
     setCargando(true);
 
     try {
-      const credentials: AuthRequest = { email, password };
-      await login(credentials); // llama a tu authService y guarda token/usuario
-
-      // Redirección según rol (ejemplo)
-      const usuario = JSON.parse(localStorage.getItem('usuario') || '{}');
-      if (usuario.rol === "AGRICULTOR") {
-        navigate('/dashboard/agricultor');
-      } else if (usuario.rolId === "ADMIN") {
-        navigate('/dashboard/admin');
-      } else {
-        navigate('/'); // cliente u otro rol
+      // Validación simple
+      if (!email || !password) {
+        setError('Por favor completa todos los campos');
+        setCargando(false);
+        return;
       }
+
+      if (password.length < 6) {
+        setError('La contraseña debe tener al menos 6 caracteres');
+        setCargando(false);
+        return;
+      }
+
+      // Simular delay de login
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      // Guardar usuario en localStorage (simulado)
+      const usuarioData = {
+        id: Math.random().toString(36).substr(2, 9),
+        email: email,
+        nombre: email.split('@')[0],
+        rol: 'AGRICULTOR'
+      };
+
+      localStorage.setItem('user', JSON.stringify(usuarioData));
+      
+      // Redireccionar al dashboard
+      navigate('/dashboard/agricultor');
     } catch (err: unknown) {
       console.error(err);
-      const axiosError = err as AxiosError<{ error: string }>;
-      setError(axiosError.response?.data?.error || 'Email o contraseña inválidos');
+      setError('Error al iniciar sesión. Intenta nuevamente.');
     } finally {
       setCargando(false);
     }

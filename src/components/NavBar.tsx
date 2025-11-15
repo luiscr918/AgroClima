@@ -1,8 +1,16 @@
 import { Link } from 'react-router-dom';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export default function NavBar() {
   const [open, setOpen] = useState(false);
+  const [usuario, setUsuario] = useState<any>(null);
+
+  useEffect(() => {
+    const userData = localStorage.getItem('user');
+    if (userData) {
+      setUsuario(JSON.parse(userData));
+    }
+  }, []);
 
   return (
     <header className="w-full bg-white/60 backdrop-blur-md shadow-sm">
@@ -14,7 +22,11 @@ export default function NavBar() {
           <Link to="/" className="text-green-700 hover:underline focus:outline-none focus:ring-2 focus:ring-green-300 rounded">Inicio</Link>
           <Link to="/#features" className="text-green-700 hover:underline focus:outline-none focus:ring-2 focus:ring-green-300 rounded">Funciones</Link>
           <Link to="/" className="text-green-700 hover:underline focus:outline-none focus:ring-2 focus:ring-green-300 rounded">Contacto</Link>
-          <Link to="/iniciar-sesion" className="ml-2 px-4 py-2 bg-green-700 text-white rounded-md text-sm hover:bg-green-800 focus:outline-none focus:ring-2 focus:ring-green-300">Iniciar sesión</Link>
+          {usuario ? (
+            <Link to="/dashboard" className="ml-2 px-4 py-2 bg-green-700 text-white rounded-md text-sm hover:bg-green-800 focus:outline-none focus:ring-2 focus:ring-green-300">Dashboard</Link>
+          ) : (
+            <Link to="/iniciar-sesion" className="ml-2 px-4 py-2 bg-green-700 text-white rounded-md text-sm hover:bg-green-800 focus:outline-none focus:ring-2 focus:ring-green-300">Iniciar sesión</Link>
+          )}
         </nav>
 
         {/* Mobile menu button */}
@@ -43,7 +55,11 @@ export default function NavBar() {
           <Link to="/" className="block py-2 text-green-700 hover:bg-green-50 rounded px-2">Inicio</Link>
           <Link to="/#features" className="block py-2 text-green-700 hover:bg-green-50 rounded px-2">Funciones</Link>
           <Link to="/" className="block py-2 text-green-700 hover:bg-green-50 rounded px-2">Contacto</Link>
-          <Link to="/iniciar-sesion" onClick={() => setOpen(false)} className="mt-2 block w-full text-left py-2 bg-green-700 text-white rounded px-2">Iniciar sesión</Link>
+          {usuario ? (
+            <Link to="/dashboard" onClick={() => setOpen(false)} className="mt-2 block w-full text-left py-2 bg-green-700 text-white rounded px-2">Dashboard</Link>
+          ) : (
+            <Link to="/iniciar-sesion" onClick={() => setOpen(false)} className="mt-2 block w-full text-left py-2 bg-green-700 text-white rounded px-2">Iniciar sesión</Link>
+          )}
         </nav>
       </div>
     </header>
