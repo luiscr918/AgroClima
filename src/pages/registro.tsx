@@ -1,20 +1,22 @@
-import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { Eye, EyeOff, Mail, Lock, User, Check } from 'lucide-react';
-import { motion } from 'framer-motion';
-import NavBar from '../components/NavBar';
-import Footer from '../components/Footer';
-
+import { useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import { Eye, EyeOff, Mail, Lock, User, Check } from "lucide-react";
+import { motion } from "framer-motion";
+import NavBar from "../components/NavBar";
+import Footer from "../components/Footer";
+import { authService } from "../services/authService";
 
 export default function Registro() {
-  const [nombre, setNombre] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+  const [nombre, setNombre] = useState("");
+  const [apellido, setApellido] = useState(""); // agregado
+  const [email, setEmail] = useState("");
+  const [telefono, setTelefono] = useState(""); // agregado
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [aceptaTerminos, setAceptaTerminos] = useState(false);
+  /*  const [aceptaTerminos, setAceptaTerminos] = useState(false); */
   const [cargando, setCargando] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [exito, setExito] = useState(false);
   const navigate = useNavigate();
 
@@ -30,50 +32,88 @@ export default function Registro() {
   }
 
   const passwordStrength = getPasswordStrength(password);
-  const strengthLabels = ['Muy débil', 'Débil', 'Medio', 'Fuerte', 'Muy fuerte'];
-  const strengthColors = ['bg-red-500', 'bg-orange-500', 'bg-yellow-500', 'bg-lime-500', 'bg-green-500'];
+  const strengthLabels = [
+    "Muy débil",
+    "Débil",
+    "Medio",
+    "Fuerte",
+    "Muy fuerte",
+  ];
+  const strengthColors = [
+    "bg-red-500",
+    "bg-orange-500",
+    "bg-yellow-500",
+    "bg-lime-500",
+    "bg-green-500",
+  ];
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setError('');
-    setCargando(true);
+async function handleSubmit(e: React.FormEvent) {
+  e.preventDefault();
+  setError("");
+  setCargando(true);
 
-    // Validaciones
-    if (password !== confirmPassword) {
-      setError('Las contraseñas no coinciden');
-      setCargando(false);
-      return;
-    }
-
-    if (passwordStrength < 2) {
-      setError('La contraseña es muy débil');
-      setCargando(false);
-      return;
-    }
-
-    if (!aceptaTerminos) {
-      setError('Debes aceptar los términos y condiciones');
-      setCargando(false);
-      return;
-    }
-
-    try {
-      // Simulación de registro
-      if (nombre && email && password.length >= 6) {
-        localStorage.setItem('user', JSON.stringify({ email, nombre }));
-        setExito(true);
-        setTimeout(() => {
-          navigate('/iniciar-sesion');
-        }, 2000);
-      } else {
-        setError('Completa todos los campos correctamente');
-      }
-    } catch (err) {
-      setError('Error al registrarse. Intenta de nuevo.');
-    } finally {
-      setCargando(false);
-    }
+  // Validar campos obligatorios
+  if (!nombre.trim() || !apellido.trim() || !email.trim() || !telefono.trim()) {
+    setError("Completa todos los campos obligatorios");
+    setCargando(false);
+    return;
   }
+
+  // Validar email
+  const emailRegex = /^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
+  if (!emailRegex.test(email)) {
+    setError("Ingresa un correo válido");
+    setCargando(false);
+    return;
+  }
+
+  // Validar teléfono
+  const telefonoRegex = /^[0-9]{10}$/;
+  if (!telefonoRegex.test(telefono)) {
+    setError("El teléfono debe tener 10 dígitos y solo números");
+    setCargando(false);
+    return;
+  }
+
+  // Validar contraseña
+  const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^a-zA-Z0-9]).{8,}$/;
+  if (!passwordRegex.test(password)) {
+    setError("La contraseña debe tener mínimo 8 caracteres, incluir mayúscula, minúscula, número y caracter especial");
+    setCargando(false);
+    return;
+  }
+
+  // Confirmar contraseña
+  if (password !== confirmPassword) {
+    setError("Las contraseñas no coinciden");
+    setCargando(false);
+    return;
+  }
+
+  try {
+    await authService.register({
+      nombre,
+      apellido,
+      email,
+      telefono,
+      password,
+    });
+
+    setExito(true);
+    setTimeout(() => {
+      navigate("/iniciar-sesion");
+    }, 2000);
+  } catch (err: unknown) {
+    console.error(err);
+    const error = err as { response?: { data?: { error?: string } } };
+    setError(
+      error.response?.data?.error || "Error al registrarse. Intenta de nuevo."
+    );
+  } finally {
+    setCargando(false);
+  }
+}
+
 
   if (exito) {
     return (
@@ -91,7 +131,9 @@ export default function Registro() {
                   <Check className="w-8 h-8 text-green-700" />
                 </div>
               </div>
-              <h2 className="text-2xl font-bold text-green-800 mb-2">¡Registro exitoso!</h2>
+              <h2 className="text-2xl font-bold text-green-800 mb-2">
+                ¡Registro exitoso!
+              </h2>
               <p className="text-gray-600 mb-4">
                 Tu cuenta ha sido creada. Redirigiendo a iniciar sesión...
               </p>
@@ -116,7 +158,9 @@ export default function Registro() {
         >
           <div className="bg-white rounded-2xl shadow-xl p-8 mb-6">
             <div className="text-center mb-8">
-              <h1 className="text-3xl font-bold text-green-800">Crear Cuenta</h1>
+              <h1 className="text-3xl font-bold text-green-800">
+                Crear Cuenta
+              </h1>
               <p className="text-gray-600 mt-2">Únete a AgroClima hoy</p>
             </div>
 
@@ -143,6 +187,38 @@ export default function Registro() {
                     required
                   />
                 </div>
+              </div>
+              {/* Apellido */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Apellido
+                </label>
+                <div className="relative">
+                  <User className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
+                  <input
+                    type="text"
+                    value={apellido}
+                    onChange={(e) => setApellido(e.target.value)}
+                    placeholder="Tu apellido"
+                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition"
+                    required
+                  />
+                </div>
+              </div>
+
+              {/* Teléfono */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Teléfono
+                </label>
+                <input
+                  type="tel"
+                  value={telefono}
+                  onChange={(e) => setTelefono(e.target.value)}
+                  placeholder="0981234567"
+                  className="w-full pl-4 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition"
+                  required
+                />
               </div>
 
               {/* Email */}
@@ -171,7 +247,7 @@ export default function Registro() {
                 <div className="relative">
                   <Lock className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
                   <input
-                    type={showPassword ? 'text' : 'password'}
+                    type={showPassword ? "text" : "password"}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••"
@@ -183,7 +259,11 @@ export default function Registro() {
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute right-3 top-3 text-gray-400 hover:text-gray-600"
                   >
-                    {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                    {showPassword ? (
+                      <EyeOff className="w-5 h-5" />
+                    ) : (
+                      <Eye className="w-5 h-5" />
+                    )}
                   </button>
                 </div>
 
@@ -195,13 +275,18 @@ export default function Registro() {
                         <div
                           key={i}
                           className={`h-1 flex-1 rounded ${
-                            i < passwordStrength ? strengthColors[passwordStrength - 1] : 'bg-gray-200'
+                            i < passwordStrength
+                              ? strengthColors[passwordStrength - 1]
+                              : "bg-gray-200"
                           }`}
                         />
                       ))}
                     </div>
                     <p className="text-xs text-gray-600">
-                      Fuerza: <span className="font-medium">{strengthLabels[passwordStrength]}</span>
+                      Fuerza:{" "}
+                      <span className="font-medium">
+                        {strengthLabels[passwordStrength]}
+                      </span>
                     </p>
                   </div>
                 )}
@@ -215,7 +300,7 @@ export default function Registro() {
                 <div className="relative">
                   <Lock className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
                   <input
-                    type={showPassword ? 'text' : 'password'}
+                    type={showPassword ? "text" : "password"}
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     placeholder="••••••••"
@@ -224,12 +309,14 @@ export default function Registro() {
                   />
                 </div>
                 {confirmPassword && password === confirmPassword && (
-                  <p className="text-xs text-green-600 mt-1">✓ Las contraseñas coinciden</p>
+                  <p className="text-xs text-green-600 mt-1">
+                    ✓ Las contraseñas coinciden
+                  </p>
                 )}
               </div>
 
               {/* Términos */}
-              <div className="flex items-start gap-2 mt-4">
+              {/*               <div className="flex items-start gap-2 mt-4">
                 <input
                   type="checkbox"
                   id="terminos"
@@ -237,13 +324,19 @@ export default function Registro() {
                   onChange={(e) => setAceptaTerminos(e.target.checked)}
                   className="mt-1 w-4 h-4 rounded border-gray-300 text-green-700 cursor-pointer"
                 />
-                <label htmlFor="terminos" className="text-xs text-gray-600 cursor-pointer">
-                  Acepto los{' '}
-                  <button type="button" className="text-green-700 hover:text-green-800 underline">
+                <label
+                  htmlFor="terminos"
+                  className="text-xs text-gray-600 cursor-pointer"
+                >
+                  Acepto los{" "}
+                  <button
+                    type="button"
+                    className="text-green-700 hover:text-green-800 underline"
+                  >
                     términos y condiciones
                   </button>
                 </label>
-              </div>
+              </div> */}
 
               {/* Botón registrarse */}
               <button
@@ -251,15 +344,18 @@ export default function Registro() {
                 disabled={cargando}
                 className="w-full mt-6 px-4 py-3 bg-green-700 text-white rounded-lg font-medium hover:bg-green-800 disabled:bg-gray-400 transition"
               >
-                {cargando ? 'Registrando...' : 'Crear Cuenta'}
+                {cargando ? "Registrando..." : "Crear Cuenta"}
               </button>
             </form>
 
             {/* Link a iniciar sesión */}
             <div className="mt-6 text-center">
               <p className="text-sm text-gray-600">
-                ¿Ya tienes cuenta?{' '}
-                <Link to="/iniciar-sesion" className="text-green-700 hover:text-green-800 font-medium">
+                ¿Ya tienes cuenta?{" "}
+                <Link
+                  to="/iniciar-sesion"
+                  className="text-green-700 hover:text-green-800 font-medium"
+                >
                   Inicia sesión aquí
                 </Link>
               </p>
