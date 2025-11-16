@@ -9,6 +9,8 @@ export interface Cultivo {
   tipo: string;
   cicloDias: number;
   temporadaOptima: string;
-  terreno?: Terreno; // referencia al Terreno padre
+  terreno?: Partial<Terreno>; // referencia al Terreno padre
   siembras?: Siembra[]; // relación con Siembras
+    // 🔥 Agregamos la propiedad transitoria del JSON
+  terrenoId?: number; // <- AQUÍ ESTÁ LA SOLUCIÓN
 }

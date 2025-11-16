@@ -12,6 +12,9 @@ import { Rol } from "../enums/Rol";
 import { ProfileAgricultor } from "../pages/agricultor/ProfileAgricultor";
 import { NuevoTerreno } from "../pages/agricultor/NuevoTerreno";
 import { ConfigurarParcela } from "../pages/ConfigurarParcela";
+import { MisCultivos } from "../pages/agricultor/MisCultivos";
+import { NuevoCultivo } from "../pages/agricultor/NuevoCultivo";
+import { ConfigurarCultivo } from "../pages/agricultor/ConfigurarCultivo";
 
 export const AppRoutes = () => {
   return (
@@ -66,6 +69,30 @@ export const AppRoutes = () => {
         element={
           <ProtectedRoute roles={[Rol.AGRICULTOR]}>
             <ProfileAgricultor />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/mis-cultivos/:id"
+        element={
+          <ProtectedRoute roles={[Rol.AGRICULTOR]}>
+            <MisCultivos />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/nuevo-cultivo/:id"
+        element={
+          <ProtectedRoute roles={[Rol.AGRICULTOR]}>
+            <NuevoCultivo />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/configurar-cultivo/:id"
+        element={
+          <ProtectedRoute roles={[Rol.AGRICULTOR]}>
+            <ConfigurarCultivo />
           </ProtectedRoute>
         }
       />
