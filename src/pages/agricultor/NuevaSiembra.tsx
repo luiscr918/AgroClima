@@ -75,7 +75,7 @@ export const NuevaSiembra = () => {
         showConfirmButton: false,
       });
 
-      setTimeout(() => navigate(`/cultivos/${cultivo.id}/siembras`), 1500);
+      setTimeout(() => navigate(`/mis-siembras/${cultivo.id}`), 1500);
     } catch (error) {
       console.error(error);
       Swal.fire("Error", "No se pudo guardar la siembra.", "error");

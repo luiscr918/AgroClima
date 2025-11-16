@@ -9,6 +9,8 @@ import type { Siembra } from "../../models/Siembra";
 import { SiembraService } from "../../services/siembraService";
 import { SidebarAgricultor } from "../../components/SidebarAgricultor";
 import type { Usuario } from "../../models/Usuario";
+import { CultivoService } from "../../services/cultivoService";
+import { UsuarioService } from "../../services/usuarioService";
 
 export const MisSiembras = () => {
   const { id } = useParams<{ id: string }>(); // id del cultivo
@@ -17,18 +19,44 @@ export const MisSiembras = () => {
   const [siembras, setSiembras] = useState<Siembra[]>([]);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [loading, setLoading] = useState(true);
+  const [nombreCultivo, setNombreCultivo] = useState<string>("");
+  const [nombreUsuario, setNombreUsuario] = useState<string>("");
+  const [apellidoUsuario, setApellidoUsuario] = useState<string>("");
 
-  // Cargar siembras del cultivo
+  // Cargar siembras + nombre del cultivo
   useEffect(() => {
     if (!id) return;
     const cultivoId = Number(id);
     if (isNaN(cultivoId)) return;
 
-    SiembraService.getSiembrasByCultivo(cultivoId)
-      .then((data) => setSiembras(data))
-      .catch((err) => console.error("Error cargando siembras:", err))
-      .finally(() => setLoading(false));
-  }, [id]);
+    async function cargarTodo() {
+      try {
+        // 1️⃣ Traer siembras
+        const data = await SiembraService.getSiembrasByCultivo(cultivoId);
+        setSiembras(data);
+
+        // 2️⃣ Traer cultivo para obtener su nombre
+        const cultivo = await CultivoService.getCultivoById(cultivoId);
+        setNombreCultivo(cultivo.nombre ?? "Cultivo");
+        //traer usuario para obtener nombre completo (solo si tenemos usuario.id)
+        if (usuario?.id) {
+          const usuarioCompleto = await UsuarioService.getUsuarioById(
+            usuario.id
+          );
+          if (usuarioCompleto) {
+            setNombreUsuario(usuarioCompleto.nombre ?? "");
+            setApellidoUsuario(usuarioCompleto.apellido ?? "");
+          }
+        }
+      } catch (err) {
+        console.error("Error cargando siembras:", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    cargarTodo();
+  }, [id, usuario?.id]);
 
   const handleCerrarSesion = () => {
     logout();
@@ -66,8 +94,7 @@ export const MisSiembras = () => {
   const fmtDate = (d?: string) => {
     if (!d) return "-";
     try {
-      const parsed = new Date(d);
-      return parsed.toLocaleDateString("es-ES");
+      return new Date(d).toLocaleDateString("es-ES");
     } catch {
       return d;
     }
@@ -98,7 +125,9 @@ export const MisSiembras = () => {
               <ArrowLeft className="w-5 h-5 text-gray-600" />
             </button>
             <Cloud className="w-8 h-8 text-green-600" />
-            <h1 className="text-2xl font-bold text-gray-800">Mis Siembras</h1>
+            <h1 className="text-2xl font-bold text-gray-800">
+              Mis Siembras – {nombreCultivo}
+            </h1>
 
             <motion.button
               whileHover={{ scale: 1.02 }}
@@ -119,7 +148,7 @@ export const MisSiembras = () => {
             className="mb-8"
           >
             <h2 className="text-3xl font-bold text-gray-800">
-              Bienvenido, {usuario.email.split("@")[0]}
+              Bienvenido, {nombreUsuario} {apellidoUsuario}
             </h2>
             <p className="text-gray-600 mt-2">
               Este cultivo tiene {siembras.length} siembra
@@ -139,9 +168,8 @@ export const MisSiembras = () => {
                   className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition"
                 >
                   <div className="bg-linear-to-r from-yellow-500 to-yellow-600 text-white p-4">
-                    <h4 className="font-bold text-lg">
-                      Siembra #{siembra.id ?? "-"}
-                    </h4>
+                    {/* 🔥 Contador en vez del id */}
+                    <h4 className="font-bold text-lg">Siembra #{idx + 1}</h4>
                   </div>
 
                   <div className="p-4 space-y-2 text-gray-600">
@@ -153,7 +181,7 @@ export const MisSiembras = () => {
                       <strong>Estado:</strong> {String(siembra.estado)}
                     </p>
                     <p>
-                      <strong>Cultivo:</strong> {siembra.cultivo?.nombre ?? "-"}
+                      <strong>Cultivo:</strong> {nombreCultivo}
                     </p>
                   </div>
 
@@ -166,8 +194,7 @@ export const MisSiembras = () => {
                       }
                       className="flex-1 px-4 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition font-medium flex justify-center items-center gap-2"
                     >
-                      <Edit className="w-4 h-4" />
-                      Editar
+                      <Edit className="w-4 h-4" /> Editar
                     </motion.button>
 
                     <motion.button
@@ -176,8 +203,7 @@ export const MisSiembras = () => {
                       onClick={() => handleEliminar(siembra.id)}
                       className="flex-1 px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition font-medium flex justify-center items-center gap-2"
                     >
-                      <Trash2 className="w-4 h-4" />
-                      Eliminar
+                      <Trash2 className="w-4 h-4" /> Eliminar
                     </motion.button>
                   </div>
                 </motion.div>
@@ -200,8 +226,7 @@ export const MisSiembras = () => {
                 onClick={() => navigate(`/nueva-siembra/${id}`)}
                 className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition font-medium flex items-center gap-2 mx-auto"
               >
-                <Plus className="w-5 h-5" />
-                Crear Nueva Siembra
+                <Plus className="w-5 h-5" /> Crear Nueva Siembra
               </motion.button>
             </motion.div>
           )}
