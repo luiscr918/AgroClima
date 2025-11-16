@@ -1,53 +1,70 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Cloud, Droplets, Wind, Sun, AlertCircle, Leaf, ArrowLeft } from 'lucide-react';
+import {
+  Cloud,
+  Droplets,
+  Wind,
+  Sun,
+  AlertCircle,
+  Leaf,
+  ArrowLeft,
+} from 'lucide-react';
 import { motion } from 'framer-motion';
 import NavBar from '../components/NavBar';
 import Footer from '../components/Footer';
+import { TerrenoService } from '../services/terrenoService';
+import type { Terreno } from '../models/Terreno';
 
+export type Recomendacion = {
+  recommendations: {
+    crop: string;
+    sowing_window: string;
+    notes: string;
+  }[];
+};
 
 export default function PanelParcela() {
-  const { id } = useParams();
+  const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [terreno, setTerreno] = useState<any>(null);
-  const [clima, setClima] = useState<any>(null);
-  const [recomendaciones, setRecomendaciones] = useState<any>(null);
+  const [terreno, setTerreno] = useState<Terreno | null>(null);
+  const [recomendaciones, setRecomendaciones] = useState<Recomendacion | null>(null);
   const [cargandoReco, setCargandoReco] = useState(false);
   const [cargando, setCargando] = useState(true);
+
+  // Datos de clima simulados
+  const clima = {
+    temperature: 25,
+    tempMin: 18,
+    precipitacion: 2,
+    viento: 10,
+  };
 
   useEffect(() => {
     if (!id) return;
 
-    fetch(`/api/fields/${id}`)
-      .then((r) => r.json())
-      .then((terreno_data) => {
-        setTerreno(terreno_data);
-        // Obtener clima con coordenadas del terreno
-        if (terreno_data.lat && terreno_data.lon) {
-          fetch(`/api/weather?lat=${terreno_data.lat}&lon=${terreno_data.lon}`)
-            .then((r) => r.json())
-            .then(setClima)
-            .catch(console.error);
-        }
-      })
+    const terrenoId = Number(id);
+    if (isNaN(terrenoId)) return;
+
+    // Cargar terreno desde servicio (puedes reemplazar con tu API real)
+    TerrenoService.getTerrenoById(terrenoId)
+      .then((data) => setTerreno(data))
       .catch(console.error)
       .finally(() => setCargando(false));
   }, [id]);
 
-  async function generarRecomendaciones() {
-    if (!id) return;
+  // Generar recomendaciones simuladas (puedes reemplazar con tu API real)
+  const generarRecomendaciones = () => {
     setCargandoReco(true);
-    try {
-      const r = await fetch(`/api/fields/${id}/recommendations`, { method: 'POST' });
-      const data = await r.json();
-      setRecomendaciones(data);
-    } catch (e) {
-      console.error(e);
-      alert('Error generando recomendaciones');
-    } finally {
+    setTimeout(() => {
+      setRecomendaciones({
+        recommendations: [
+          { crop: 'Maíz', sowing_window: 'Abril - Junio', notes: 'Riego moderado' },
+          { crop: 'Frijol', sowing_window: 'Mayo - Julio', notes: 'Suelo ligeramente ácido' },
+        ],
+      });
       setCargandoReco(false);
-    }
-  }
+    }, 1000);
+  };
 
   if (cargando) {
     return (
@@ -73,10 +90,10 @@ export default function PanelParcela() {
             <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
             <p className="text-gray-600 mb-4">Terreno no encontrado</p>
             <button
-              onClick={() => navigate('/')}
+              onClick={() => navigate('/mis-terrenos')}
               className="px-4 py-2 bg-green-700 text-white rounded-lg hover:bg-green-800"
             >
-              Volver al inicio
+              Volver a Mis Terrenos
             </button>
           </div>
         </main>
@@ -85,22 +102,19 @@ export default function PanelParcela() {
     );
   }
 
-  // Parsear datos del clima
-  const datoClima = clima?.data || {};
-  const temperatureActual = datoClima.daily?.temperature_2m_max?.[0] || 22;
-  const tempMin = datoClima.daily?.temperature_2m_min?.[0] || 15;
-  const precipitacion = datoClima.daily?.precipitation_sum?.[0] || 0;
-  const velocidadViento = datoClima.hourly?.windspeed_10m?.[0] || 0;
-
   return (
     <div className="min-h-screen flex flex-col bg-linear-to-b from-green-50 to-green-100">
       <NavBar />
 
       <main className="grow max-w-6xl w-full mx-auto px-6 py-8">
         {/* Cabecera */}
-        <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-8"
+        >
           <button
-            onClick={() => navigate('/')}
+            onClick={() => navigate('/mis-terrenos')}
             className="flex items-center gap-2 text-green-700 hover:text-green-800 mb-4"
           >
             <ArrowLeft className="w-4 h-4" />
@@ -108,69 +122,47 @@ export default function PanelParcela() {
           </button>
 
           <div className="bg-white rounded-2xl p-6 shadow-lg">
-            <h1 className="text-4xl font-bold text-green-800">{terreno.name}</h1>
-            <p className="text-gray-600 mt-2">📍 {terreno.lat?.toFixed(4)}, {terreno.lon?.toFixed(4)}</p>
-            {terreno.area && <p className="text-gray-600">📐 Área: {terreno.area} ha</p>}
-            <p className="text-xs text-gray-500 mt-3">Creada: {new Date(terreno.createdAt).toLocaleDateString('es-ES')}</p>
+            <h1 className="text-4xl font-bold text-green-800">{terreno.nombre}</h1>
+            <p className="text-gray-600 mt-2">📍 {terreno.ubicacion}</p>
+            <p className="text-gray-600">📐 Área: {terreno.tamanioHectareas} ha</p>
+            <p className="text-xs text-gray-500 mt-3">
+              Creada: {terreno.createdAt ? new Date(terreno.createdAt).toLocaleDateString('es-ES') : '-'}
+            </p>
           </div>
         </motion.div>
 
+        {/* Clima y métricas */}
         <div className="grid md:grid-cols-3 gap-6 mb-8">
-          {/* Tarjeta Temperatura */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.1 }}
-            className="bg-white rounded-xl p-6 shadow-lg"
-          >
+          <motion.div className="bg-white rounded-xl p-6 shadow-lg">
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-semibold text-gray-700">Temperatura</h3>
               <Sun className="w-6 h-6 text-yellow-500" />
             </div>
-            <div className="text-4xl font-bold text-yellow-600 mb-2">{temperatureActual}°C</div>
-            <div className="text-sm text-gray-600">
-              Mín: {tempMin}°C | Máx: {temperatureActual}°C
-            </div>
+            <div className="text-4xl font-bold text-yellow-600 mb-2">{clima.temperature}°C</div>
+            <div className="text-sm text-gray-600">Mín: {clima.tempMin}°C | Máx: {clima.temperature}°C</div>
           </motion.div>
 
-          {/* Tarjeta Precipitación */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.2 }}
-            className="bg-white rounded-xl p-6 shadow-lg"
-          >
+          <motion.div className="bg-white rounded-xl p-6 shadow-lg">
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-semibold text-gray-700">Precipitación</h3>
               <Droplets className="w-6 h-6 text-blue-500" />
             </div>
-            <div className="text-4xl font-bold text-blue-600 mb-2">{precipitacion.toFixed(1)} mm</div>
+            <div className="text-4xl font-bold text-blue-600 mb-2">{clima.precipitacion.toFixed(1)} mm</div>
             <div className="text-sm text-gray-600">Lluvia esperada hoy</div>
           </motion.div>
 
-          {/* Tarjeta Viento */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.3 }}
-            className="bg-white rounded-xl p-6 shadow-lg"
-          >
+          <motion.div className="bg-white rounded-xl p-6 shadow-lg">
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-semibold text-gray-700">Viento</h3>
               <Wind className="w-6 h-6 text-cyan-500" />
             </div>
-            <div className="text-4xl font-bold text-cyan-600 mb-2">{velocidadViento.toFixed(1)} km/h</div>
+            <div className="text-4xl font-bold text-cyan-600 mb-2">{clima.viento.toFixed(1)} km/h</div>
             <div className="text-sm text-gray-600">Velocidad actual</div>
           </motion.div>
         </div>
 
-        {/* Sección de Recomendaciones */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-          className="bg-white rounded-2xl p-8 shadow-lg"
-        >
+        {/* Recomendaciones */}
+        <motion.div className="bg-white rounded-2xl p-8 shadow-lg">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-3">
               <div className="p-3 rounded-lg bg-green-50">
@@ -189,48 +181,23 @@ export default function PanelParcela() {
 
           {recomendaciones ? (
             <div className="space-y-4">
-              {recomendaciones.recommendations?.recommended_crops ? (
-                <div>
-                  <h3 className="font-semibold text-gray-800 mb-3">Cultivos Recomendados</h3>
-                  <div className="grid sm:grid-cols-2 gap-4">
-                    {recomendaciones.recommendations.recommended_crops.map(
-                      (cultivo: any, idx: number) => (
-                        <div key={idx} className="p-4 bg-green-50 rounded-lg border border-green-200">
-                          <h4 className="font-bold text-green-800 mb-1">{cultivo.crop}</h4>
-                          <p className="text-sm text-gray-700">
-                            <strong>Período de siembra:</strong> {cultivo.sowing_window}
-                          </p>
-                          <p className="text-sm text-gray-600 mt-2">{cultivo.notes}</p>
-                        </div>
-                      )
-                    )}
-                  </div>
-                </div>
-              ) : (
-                <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
-                  <p className="text-sm text-blue-800">
-                    {recomendaciones.note ||
-                      'Las recomendaciones se generaron. Configura tu OPENAI_KEY en el servidor para obtener recomendaciones más personalizadas.'}
+              {recomendaciones.recommendations.map((cultivo, idx) => (
+                <div key={idx} className="p-4 bg-green-50 rounded-lg border border-green-200">
+                  <h4 className="font-bold text-green-800 mb-1">{cultivo.crop}</h4>
+                  <p className="text-sm text-gray-700">
+                    <strong>Período de siembra:</strong> {cultivo.sowing_window}
                   </p>
+                  <p className="text-sm text-gray-600 mt-2">{cultivo.notes}</p>
                 </div>
-              )}
+              ))}
             </div>
           ) : (
             <div className="text-center py-8">
               <Cloud className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-              <p className="text-gray-600">
-                Haz clic en el botón anterior para generar recomendaciones basadas en IA
-              </p>
+              <p className="text-gray-600">Haz clic en el botón anterior para generar recomendaciones basadas en IA</p>
             </div>
           )}
         </motion.div>
-
-        {/* Info de datos climáticos */}
-        <div className="mt-8 p-4 bg-blue-50 rounded-lg border border-blue-200">
-          <p className="text-xs text-blue-800">
-            <strong>📊 Fuente de datos:</strong> {clima?.source || 'OpenWeatherMap'} - Los datos se actualizan automáticamente
-          </p>
-        </div>
       </main>
 
       <Footer />

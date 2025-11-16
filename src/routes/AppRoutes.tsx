@@ -2,7 +2,7 @@ import { Route, Routes } from "react-router-dom";
 import { HomePage } from "../pages/HomePage";
 import IniciarSesion from "../pages/login";
 import Registro from "../pages/registro";
-import ConfigurarParcela from "../pages/ConfigurarParcela";
+
 import PanelParcela from "../pages/PanelParcela";
 import { ProtectedRoute } from "./ProtectedRoute";
 import { DashboardAgricultor } from "../pages/agricultor/DashboardAgricultor";
@@ -11,6 +11,7 @@ import { MisTerrenos } from "../pages/agricultor/MisTerrenos";
 import { Rol } from "../enums/Rol";
 import { ProfileAgricultor } from "../pages/agricultor/ProfileAgricultor";
 import { NuevoTerreno } from "../pages/agricultor/NuevoTerreno";
+import { ConfigurarParcela } from "../pages/ConfigurarParcela";
 
 export const AppRoutes = () => {
   return (
@@ -45,7 +46,7 @@ export const AppRoutes = () => {
         }
       />
       <Route
-        path="/configurar-terreno"
+        path="/configurar-terreno/:id"
         element={
           <ProtectedRoute roles={[Rol.AGRICULTOR]}>
             <ConfigurarParcela />

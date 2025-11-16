@@ -1,74 +1,81 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import {
-  MapPin,
-  Plus,
-  Eye,
-  Trash2,
-  Edit,
-  Cloud,
-} from 'lucide-react';
-import { motion } from 'framer-motion';
-import { SidebarAgricultor } from '../../components/SidebarAgricultor';
-import { useAuth } from '../../context/useAuth';
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { MapPin, Plus, Eye, Trash2, Edit, Cloud } from "lucide-react";
+import { motion } from "framer-motion";
+import Swal from "sweetalert2";
 
-interface Terreno {
-  id: number;
-  nombre: string;
-  tamanioHectareas: number;
-  ubicacion: string;
-  tipoSuelo: string;
-  usuario?: string;
-}
+import { SidebarAgricultor } from "../../components/SidebarAgricultor";
+import { useAuth } from "../../context/useAuth";
+import { TerrenoService } from "../../services/terrenoService";
+import type { Terreno } from "../../models/Terreno";
+import type { Usuario } from "../../models/Usuario";
 
 export const MisTerrenos = () => {
   const navigate = useNavigate();
-  const { usuario, logout } = useAuth();   // ✔ usa auth global
+  const { usuario, logout } = useAuth();
   const [terrenos, setTerrenos] = useState<Terreno[]>([]);
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
+  // Cargar terrenos del usuario desde backend
   useEffect(() => {
-    if (!usuario) return;  // ✔ ahora NO te manda al login automáticamente
+    if (!usuario?.id) return;
 
-    // Cargar terrenos del usuario actual desde localStorage
-    const terrenosGuardados: Terreno[] = JSON.parse(
-      localStorage.getItem('terrenos') || '[]'
-    );
-    const terrenosDelUsuario = terrenosGuardados.filter(
-      (t) => t.usuario === usuario.email
-    );
-    setTerrenos(terrenosDelUsuario);
-  }, [navigate]);
+    TerrenoService.getTerrenosByUsuario(usuario.id)
+      .then((data) => setTerrenos(data))
+      .catch((err) => console.error("Error cargando terrenos:", err));
+  }, [usuario]);
 
-const handleCerrarSesion = () => {
-  logout();
-  navigate("/iniciar-sesion");
-};
+  const handleCerrarSesion = () => {
+    logout();
+    navigate("/iniciar-sesion");
+  };
 
-  const handleEliminar = (id: number) => {
-    const terrenosGuardados: Terreno[] = JSON.parse(
-      localStorage.getItem('terrenos') || '[]'
-    );
-    const terrenosActualizados = terrenosGuardados.filter((t) => t.id !== id);
-    localStorage.setItem('terrenos', JSON.stringify(terrenosActualizados));
-    setTerrenos(terrenos.filter((t) => t.id !== id));
+  // 🔹 SweetAlert2 para eliminar terreno
+  const handleEliminar = async (id: number) => {
+    const result = await Swal.fire({
+      title: "¿Estás seguro?",
+      text: "Esta acción no se puede deshacer",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#16a34a",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Sí, eliminar",
+      cancelButtonText: "Cancelar",
+    });
+
+    if (result.isConfirmed) {
+      try {
+        await TerrenoService.deleteTerreno(id);
+        setTerrenos(terrenos.filter((t) => t.id !== id));
+        Swal.fire(
+          "Eliminado",
+          "El terreno ha sido eliminado correctamente",
+          "success"
+        );
+      } catch (error) {
+        console.error("Error eliminando terreno:", error);
+        Swal.fire("Error", "No se pudo eliminar el terreno", "error");
+      }
+    } else {
+      Swal.fire("Cancelado", "El terreno no fue eliminado", "info");
+    }
   };
 
   const handleVerDetalles = (id: number) => {
     navigate(`/terreno/${id}`);
   };
 
+  if (!usuario) return null;
+
   return (
     <div className="flex h-screen bg-gray-50">
-      {/* Sidebar */}
       <SidebarAgricultor
         sidebarOpen={sidebarOpen}
         setSidebarOpen={setSidebarOpen}
-        usuario={usuario}
+        usuario={usuario as Usuario}
         onCerrarSesion={handleCerrarSesion}
       />
 
-      {/* Main Content */}
       <main className="flex-1 overflow-auto">
         {/* Header */}
         <motion.header
@@ -85,7 +92,7 @@ const handleCerrarSesion = () => {
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              onClick={() => navigate('/nuevo-terreno')}
+              onClick={() => navigate("/nuevo-terreno")}
               className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition font-medium"
             >
               <Plus className="w-5 h-5" />
@@ -94,7 +101,6 @@ const handleCerrarSesion = () => {
           </div>
         </motion.header>
 
-        {/* Content */}
         <div className="px-6 py-8">
           <motion.div
             initial={{ opacity: 0 }}
@@ -103,10 +109,11 @@ const handleCerrarSesion = () => {
             className="mb-8"
           >
             <h2 className="text-3xl font-bold text-gray-800">
-              Bienvenido, {usuario?.email?.split('@')[0]}
+              Bienvenido, {usuario.email.split("@")[0]}
             </h2>
             <p className="text-gray-600 mt-2">
-              Tienes {terrenos.length} terreno{terrenos.length !== 1 ? 's' : ''} registrado{terrenos.length !== 1 ? 's' : ''}
+              Tienes {terrenos.length} terreno{terrenos.length !== 1 ? "s" : ""}{" "}
+              registrado{terrenos.length !== 1 ? "s" : ""}
             </p>
           </motion.div>
 
@@ -121,7 +128,6 @@ const handleCerrarSesion = () => {
                   transition={{ duration: 0.3, delay: idx * 0.1 }}
                   className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition"
                 >
-                  {/* Header */}
                   <div className="bg-linear-to-r from-green-500 to-green-600 text-white p-4">
                     <h4 className="font-bold text-lg">{terreno.nombre}</h4>
                     <p className="flex items-center gap-1 text-sm opacity-90 mt-1">
@@ -130,40 +136,41 @@ const handleCerrarSesion = () => {
                     </p>
                   </div>
 
-                  {/* Weather Info */}
                   <div className="p-4 space-y-3">
-                    <div className="space-y-2">
-                      <p className="text-sm text-gray-600">
-                        <strong>Tipo de Suelo:</strong> {terreno.tipoSuelo}
-                      </p>
-                      <p className="text-sm text-gray-600">
-                        <strong>Tamaño:</strong> {terreno.tamanioHectareas} ha
-                      </p>
-                    </div>
+                    <p className="text-sm text-gray-600">
+                      <strong>Tipo de Suelo:</strong> {terreno.tipoSuelo}
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      <strong>Tamaño:</strong> {terreno.tamanioHectareas} ha
+                    </p>
 
-                    {/* Action Buttons */}
                     <div className="flex gap-2 pt-3 border-t border-gray-200">
                       <motion.button
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
-                        onClick={() => handleVerDetalles(terreno.id)}
+                        onClick={() => handleVerDetalles(terreno.id ?? 0)}
                         className="flex-1 px-4 py-2 bg-green-100 text-green-700 rounded-lg font-medium hover:bg-green-200 transition flex items-center justify-center gap-2"
                       >
                         <Eye className="w-4 h-4" />
                         Ver
                       </motion.button>
+
                       <motion.button
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
+                        onClick={() =>
+                          navigate(`/configurar-terreno/${terreno.id}`)
+                        }
                         className="flex-1 px-4 py-2 bg-blue-100 text-blue-700 rounded-lg font-medium hover:bg-blue-200 transition flex items-center justify-center gap-2"
                       >
                         <Edit className="w-4 h-4" />
                         Editar
                       </motion.button>
+
                       <motion.button
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
-                        onClick={() => handleEliminar(terreno.id)}
+                        onClick={() => handleEliminar(terreno.id ?? 0)}
                         className="flex-1 px-4 py-2 bg-red-100 text-red-700 rounded-lg font-medium hover:bg-red-200 transition flex items-center justify-center gap-2"
                       >
                         <Trash2 className="w-4 h-4" />
@@ -187,7 +194,7 @@ const handleCerrarSesion = () => {
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                onClick={() => navigate('/nuevo-terreno')}
+                onClick={() => navigate("/nuevo-terreno")}
                 className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition font-medium flex items-center gap-2 mx-auto"
               >
                 <Plus className="w-5 h-5" />
