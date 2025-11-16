@@ -15,6 +15,9 @@ import { ConfigurarParcela } from "../pages/ConfigurarParcela";
 import { MisCultivos } from "../pages/agricultor/MisCultivos";
 import { NuevoCultivo } from "../pages/agricultor/NuevoCultivo";
 import { ConfigurarCultivo } from "../pages/agricultor/ConfigurarCultivo";
+import { MisSiembras } from "../pages/agricultor/MisSiembras";
+import { NuevaSiembra } from "../pages/agricultor/NuevaSiembra";
+import { ConfigurarSiembra } from "../pages/agricultor/ConfigurarSiembra";
 
 export const AppRoutes = () => {
   return (
@@ -93,6 +96,30 @@ export const AppRoutes = () => {
         element={
           <ProtectedRoute roles={[Rol.AGRICULTOR]}>
             <ConfigurarCultivo />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/mis-siembras/:id"
+        element={
+          <ProtectedRoute roles={[Rol.AGRICULTOR]}>
+            <MisSiembras />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/nueva-siembra/:id"
+        element={
+          <ProtectedRoute roles={[Rol.AGRICULTOR]}>
+            <NuevaSiembra />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/configurar-siembra/:id"
+        element={
+          <ProtectedRoute roles={[Rol.AGRICULTOR]}>
+            <ConfigurarSiembra />
           </ProtectedRoute>
         }
       />
