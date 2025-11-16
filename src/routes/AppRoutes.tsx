@@ -6,10 +6,11 @@ import ConfigurarParcela from "../pages/ConfigurarParcela";
 import PanelParcela from "../pages/PanelParcela";
 import { ProtectedRoute } from "./ProtectedRoute";
 import { DashboardAgricultor } from "../pages/agricultor/DashboardAgricultor";
-import { NuevoTerreno } from "../pages/agricultor/NuevoTerreno";
+
 import { MisTerrenos } from "../pages/agricultor/MisTerrenos";
 import { Rol } from "../enums/Rol";
 import { ProfileAgricultor } from "../pages/agricultor/ProfileAgricultor";
+import { NuevoTerreno } from "../pages/agricultor/NuevoTerreno";
 
 export const AppRoutes = () => {
   return (

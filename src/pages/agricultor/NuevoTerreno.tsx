@@ -2,14 +2,21 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Cloud, Save, ArrowLeft } from "lucide-react";
 import { motion } from "framer-motion";
+import Swal from "sweetalert2";
+
 import { SidebarAgricultor } from "../../components/SidebarAgricultor";
 import { useAuth } from "../../context/useAuth";
-
+import { TerrenoService } from "../../services/terrenoService";
+import { UsuarioService } from "../../services/usuarioService";
+import type { Usuario } from "../../models/Usuario";
+import type { Terreno } from "../../models/Terreno";
 
 export const NuevoTerreno = () => {
   const navigate = useNavigate();
-  const { usuario, logout } = useAuth(); // ✔ usamos tu auth global
+  const { usuario, logout } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(true);
+
+  const [usuarioCompleto, setUsuarioCompleto] = useState<Usuario | null>(null);
 
   const [formData, setFormData] = useState({
     nombre: "",
@@ -19,75 +26,105 @@ export const NuevoTerreno = () => {
   });
 
   const [guardando, setGuardando] = useState(false);
-  const [mensajeExito, setMensajeExito] = useState("");
 
+  // Cargar usuario completo desde backend
   useEffect(() => {
-    // Si no hay usuario, ProtectedRoute se encarga, así que NO navegamos aquí
-    if (!usuario) return;
+    if (usuario?.id) {
+      UsuarioService.getUsuarioById(usuario.id)
+        .then((data) => setUsuarioCompleto(data))
+        .catch((err) => console.error("Error cargando usuario:", err));
+    }
   }, [usuario]);
 
   const handleInputChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const validarFormulario = () => {
+    if (!formData.nombre.trim()) return "El nombre del terreno es obligatorio.";
+    if (!formData.ubicacion.trim()) return "La ubicación es obligatoria.";
+    if (!formData.tamanioHectareas.trim())
+      return "El tamaño del terreno es obligatorio.";
+    if (
+      isNaN(Number(formData.tamanioHectareas)) ||
+      Number(formData.tamanioHectareas) <= 0
+    )
+      return "El tamaño debe ser un número mayor a 0.";
+    if (!formData.tipoSuelo.trim()) return "Debe seleccionar un tipo de suelo.";
+    return null;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!usuarioCompleto) {
+      Swal.fire(
+        "Cargando",
+        "Los datos del usuario aún no se han cargado",
+        "info"
+      );
+      return;
+    }
+
+    const error = validarFormulario();
+    if (error) {
+      Swal.fire("Campos incompletos", error, "warning");
+      return;
+    }
+
     setGuardando(true);
 
     try {
-      if (
-        !formData.nombre ||
-        !formData.ubicacion ||
-        !formData.tamanioHectareas ||
-        !formData.tipoSuelo
-      ) {
-        alert("Por favor completa todos los campos requeridos");
-        setGuardando(false);
-        return;
-      }
-
-      await new Promise((resolve) => setTimeout(resolve, 800));
-
-      const nuevoTerreno = {
-        id: Date.now(),
-        nombre: formData.nombre,
-        tamanioHectareas: parseFloat(formData.tamanioHectareas),
-        ubicacion: formData.ubicacion,
-        tipoSuelo: formData.tipoSuelo,
-        usuario: usuario?.email, // ✔ usuario real del context
+      // Aseguramos que todas las propiedades requeridas existan
+      const usuarioValido: Usuario = {
+        id: usuarioCompleto.id,
+        nombre: usuarioCompleto.nombre || "",
+        apellido: usuarioCompleto.apellido || "",
+        email: usuarioCompleto.email || "",
+        password: usuarioCompleto.password || "",
+        telefono: usuarioCompleto.telefono || "",
+        rol: usuarioCompleto.rol!,
+        terrenos: usuarioCompleto.terrenos || [],
+        recomendaciones: usuarioCompleto.recomendaciones || [],
       };
 
-      // GUARDADO REAL (CONTEXT + SESSIONSTORAGE)
-      const terrenos = JSON.parse(
-        sessionStorage.getItem("terrenos") || "[]"
-      );
-      terrenos.push(nuevoTerreno);
-      sessionStorage.setItem("terrenos", JSON.stringify(terrenos));
+      const nuevoTerreno: Terreno = {
+        nombre: formData.nombre,
+        tamanioHectareas: Number(formData.tamanioHectareas),
+        ubicacion: formData.ubicacion,
+        tipoSuelo: formData.tipoSuelo,
+        usuario: usuarioValido,
+      };
 
-      setMensajeExito("¡Terreno creado exitosamente!");
-      setTimeout(() => {
-        navigate("/mis-terrenos");
-      }, 1500);
-    } catch (error) {
-      console.error("Error al guardar:", error);
-      alert("Error al guardar el terreno");
+      await TerrenoService.createTerreno(nuevoTerreno);
+
+      Swal.fire({
+        title: "¡Terreno creado!",
+        text: "El terreno fue registrado exitosamente.",
+        icon: "success",
+        timer: 1500,
+        showConfirmButton: false,
+      });
+
+      setTimeout(() => navigate("/mis-terrenos"), 1500);
+    } catch (err) {
+      console.error(err);
+      Swal.fire("Error", "Ocurrió un problema al guardar el terreno.", "error");
     } finally {
       setGuardando(false);
     }
   };
 
   const handleCerrarSesion = () => {
-    logout(); // ✔ cerrar sesión correctamente
+    logout();
     navigate("/iniciar-sesion");
   };
+
+  // No renderizamos si usuarioCompleto no está listo
+  if (!usuarioCompleto) return <div className="p-6">Cargando usuario...</div>;
 
   return (
     <div className="flex h-screen bg-gray-50">
@@ -95,7 +132,7 @@ export const NuevoTerreno = () => {
       <SidebarAgricultor
         sidebarOpen={sidebarOpen}
         setSidebarOpen={setSidebarOpen}
-        usuario={usuario}
+        usuario={usuarioCompleto}
         onCerrarSesion={handleCerrarSesion}
       />
 
@@ -107,19 +144,17 @@ export const NuevoTerreno = () => {
           transition={{ duration: 0.5 }}
           className="bg-white shadow-md sticky top-0 z-40"
         >
-          <div className="px-6 py-4 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <button
-                onClick={() => navigate("/dashboard/agricultor")}
-                className="p-2 hover:bg-gray-100 rounded-lg transition"
-              >
-                <ArrowLeft className="w-5 h-5 text-gray-600" />
-              </button>
-              <Cloud className="w-8 h-8 text-green-600" />
-              <h1 className="text-2xl font-bold text-gray-800">
-                Registrar Nuevo Terreno
-              </h1>
-            </div>
+          <div className="px-6 py-4 flex items-center gap-3">
+            <button
+              onClick={() => navigate("/dashboard/agricultor")}
+              className="p-2 hover:bg-gray-100 rounded-lg transition"
+            >
+              <ArrowLeft className="w-5 h-5 text-gray-600" />
+            </button>
+            <Cloud className="w-8 h-8 text-green-600" />
+            <h1 className="text-2xl font-bold text-gray-800">
+              Registrar Nuevo Terreno
+            </h1>
           </div>
         </motion.header>
 
@@ -170,9 +205,8 @@ export const NuevoTerreno = () => {
                   />
                 </div>
 
-                {/* Campos en fila */}
+                {/* Tamaño + Tipo de suelo */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {/* Tamaño */}
                   <div>
                     <label className="block text-sm font-bold text-gray-700 mb-2">
                       Tamaño (hectáreas) *
@@ -188,7 +222,6 @@ export const NuevoTerreno = () => {
                     />
                   </div>
 
-                  {/* Tipo de suelo */}
                   <div>
                     <label className="block text-sm font-bold text-gray-700 mb-2">
                       Tipo de Suelo *
@@ -209,17 +242,6 @@ export const NuevoTerreno = () => {
                     </select>
                   </div>
                 </div>
-
-                {/* Mensaje éxito */}
-                {mensajeExito && (
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    className="p-4 bg-green-50 border border-green-200 rounded-lg text-green-700 font-medium"
-                  >
-                    ✓ {mensajeExito}
-                  </motion.div>
-                )}
 
                 {/* Botones */}
                 <div className="flex gap-4 pt-6">
