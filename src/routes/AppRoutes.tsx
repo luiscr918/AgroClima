@@ -9,6 +9,7 @@ import { DashboardAgricultor } from "../pages/agricultor/DashboardAgricultor";
 import { NuevoTerreno } from "../pages/agricultor/NuevoTerreno";
 import { MisTerrenos } from "../pages/agricultor/MisTerrenos";
 import { Rol } from "../enums/Rol";
+import { ProfileAgricultor } from "../pages/agricultor/ProfileAgricultor";
 
 export const AppRoutes = () => {
   return (
@@ -55,6 +56,14 @@ export const AppRoutes = () => {
         element={
           <ProtectedRoute roles={[Rol.AGRICULTOR]}>
             <PanelParcela />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/profile/agricultor"
+        element={
+          <ProtectedRoute roles={[Rol.AGRICULTOR]}>
+            <ProfileAgricultor />
           </ProtectedRoute>
         }
       />

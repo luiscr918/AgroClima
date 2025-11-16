@@ -15,7 +15,6 @@ import { motion } from "framer-motion";
 import { SidebarAgricultor } from "../../components/SidebarAgricultor";
 import { useAuth } from "../../context/useAuth";
 
-
 export const DashboardAgricultor = () => {
   const navigate = useNavigate();
   const { usuario, token, logout } = useAuth(); // Usamos el contexto global
@@ -204,7 +203,6 @@ export const DashboardAgricultor = () => {
               >
                 {tab === "resumen" && "Resumen"}
                 {tab === "pronosticos" && "Pronósticos"}
-                {tab === "perfil" && "Perfil"}
               </button>
             ))}
           </motion.div>
@@ -388,93 +386,6 @@ export const DashboardAgricultor = () => {
                       </motion.div>
                     );
                   })}
-                </div>
-              </div>
-            </motion.div>
-          )}
-
-          {/* TAB: PERFIL */}
-          {tabActivo === "perfil" && (
-            <motion.div
-              key="perfil"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3 }}
-            >
-              <div className="max-w-2xl mx-auto">
-                <div className="bg-white rounded-2xl p-8 shadow-md border border-gray-100">
-                  {/* Avatar */}
-                  <div className="flex justify-center mb-6">
-                    <div className="w-24 h-24 rounded-full bg-linear-to-br from-green-400 to-green-600 flex items-center justify-center shadow-lg">
-                      <User className="w-12 h-12 text-white" />
-                    </div>
-                  </div>
-
-                  {/* User Info */}
-                  <div className="text-center mb-8">
-                    <h3 className="text-2xl font-bold text-gray-800">
-                      {usuario?.email?.split("@")[0]}
-                    </h3>
-                    <p className="text-gray-600 mt-1">{usuario?.email}</p>
-                    <p className="text-sm text-gray-500 mt-2">
-                      Agricultor Premium
-                    </p>
-                  </div>
-
-                  {/* Preferences */}
-                  <div className="space-y-4 mb-8">
-                    <h4 className="font-bold text-gray-800">
-                      Preferencias de Notificaciones
-                    </h4>
-                    <label className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition">
-                      <input
-                        type="checkbox"
-                        defaultChecked
-                        className="w-4 h-4 text-green-600"
-                      />
-                      <span className="text-gray-700">
-                        Alertas de clima extremo
-                      </span>
-                    </label>
-                    <label className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition">
-                      <input
-                        type="checkbox"
-                        defaultChecked
-                        className="w-4 h-4 text-green-600"
-                      />
-                      <span className="text-gray-700">Pronósticos diarios</span>
-                    </label>
-                    <label className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition">
-                      <input
-                        type="checkbox"
-                        defaultChecked
-                        className="w-4 h-4 text-green-600"
-                      />
-                      <span className="text-gray-700">
-                        Recomendaciones de riego
-                      </span>
-                    </label>
-                  </div>
-
-                  {/* Buttons */}
-                  <div className="flex gap-4">
-                    <motion.button
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      className="flex-1 px-6 py-3 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition"
-                    >
-                      Guardar Cambios
-                    </motion.button>
-                    <motion.button
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      onClick={handleCerrarSesion}
-                      className="flex-1 px-6 py-3 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition flex items-center justify-center gap-2"
-                    >
-                      <LogOut className="w-4 h-4" />
-                      Cerrar Sesión
-                    </motion.button>
-                  </div>
                 </div>
               </div>
             </motion.div>
