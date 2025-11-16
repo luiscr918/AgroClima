@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { ArrowLeft, Save, Sprout } from "lucide-react";
+import { ArrowLeft, Bean, Save } from "lucide-react";
 import { motion } from "framer-motion";
 import Swal from "sweetalert2";
 import { useAuth } from "../../context/useAuth";
@@ -147,7 +147,7 @@ export const ConfigurarSiembra = () => {
             >
               <ArrowLeft className="w-5 h-5 text-gray-600" />
             </button>
-            <Sprout className="w-8 h-8 text-green-600" />
+            <Bean className="w-8 h-8 text-green-600" />
             <h1 className="text-2xl font-bold text-gray-800">
               Configurar Siembra
             </h1>

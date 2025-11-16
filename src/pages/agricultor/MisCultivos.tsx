@@ -1,6 +1,14 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Cloud, Plus, Trash2, Edit, Bean } from "lucide-react";
+import {
+  Cloud,
+  Plus,
+  Trash2,
+  Edit,
+  Bean,
+  Sprout,
+  ArrowLeft,
+} from "lucide-react";
 import { motion } from "framer-motion";
 import Swal from "sweetalert2";
 import { useAuth } from "../../context/useAuth";
@@ -85,7 +93,13 @@ export const MisCultivos = () => {
           className="bg-white shadow-md sticky top-0 z-40"
         >
           <div className="px-6 py-4 flex items-center gap-3">
-            <Cloud className="w-8 h-8 text-green-600" />
+            <button
+              onClick={() => navigate(-1)}
+              className="p-2 hover:bg-gray-100 rounded-lg transition"
+            >
+              <ArrowLeft className="w-5 h-5 text-gray-600" />
+            </button>
+            <Sprout className="w-8 h-8 text-green-600" />
             <h1 className="text-2xl font-bold text-gray-800">Mis Cultivos</h1>
             <motion.button
               whileHover={{ scale: 1.02 }}

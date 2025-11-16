@@ -1,7 +1,7 @@
 // src/pages/siembras/NuevaSiembra.tsx
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Cloud, Save, ArrowLeft } from "lucide-react";
+import {  Save, ArrowLeft, Bean } from "lucide-react";
 import { motion } from "framer-motion";
 import Swal from "sweetalert2";
 
@@ -116,7 +116,7 @@ export const NuevaSiembra = () => {
               <ArrowLeft className="w-5 h-5 text-gray-600" />
             </button>
 
-            <Cloud className="w-8 h-8 text-green-600" />
+            <Bean className="w-8 h-8 text-green-600" />
             <h1 className="text-2xl font-bold text-gray-800">
               Registrar Nueva Siembra
             </h1>

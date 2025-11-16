@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Cloud, Save, ArrowLeft } from "lucide-react";
+import { Save, ArrowLeft, Sprout } from "lucide-react";
 import { motion } from "framer-motion";
 import Swal from "sweetalert2";
 import { useAuth } from "../../context/useAuth";
@@ -125,7 +125,7 @@ export const NuevoCultivo = () => {
             >
               <ArrowLeft className="w-5 h-5 text-gray-600" />
             </button>
-            <Cloud className="w-8 h-8 text-green-600" />
+            <Sprout className="w-8 h-8 text-green-600" />
             <h1 className="text-2xl font-bold text-gray-800">Nuevo Cultivo</h1>
           </div>
         </motion.header>

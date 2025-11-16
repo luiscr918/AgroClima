@@ -4,7 +4,7 @@ import { MapPin, User, LogOut, Plus, Menu, X, Home } from "lucide-react";
 import { motion } from "framer-motion";
 import { UsuarioService } from "../services/usuarioService";
 import type { Usuario } from "../models/Usuario";
-
+import logoAgro from "../assets/logoEmpresa.png";
 interface SidebarAgricultorProps {
   sidebarOpen: boolean;
   setSidebarOpen: (value: boolean) => void;
@@ -56,9 +56,11 @@ export const SidebarAgricultor = ({
       <div className="h-16 flex items-center justify-between px-4 border-b border-green-700">
         {sidebarOpen && (
           <div className="flex items-center gap-3 font-bold text-lg">
-            <div className="w-8 h-8 bg-green-400 rounded-lg flex items-center justify-center font-bold text-green-900">
-              🌱
-            </div>
+            <img
+              src={logoAgro}
+              alt="AgroClima Logo"
+              className="w-8 h-8 rounded-md object-cover"
+            />
             <span className="text-white">AgroClima</span>
           </div>
         )}

@@ -5,9 +5,9 @@ import type { Usuario } from "../../models/Usuario";
 import { SidebarAgricultor } from "../../components/SidebarAgricultor";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Cloud } from "lucide-react";
 import Swal from "sweetalert2";
-
+import logo from "../../assets/logoEmpresa.png";
+import { User } from "lucide-react";
 export const ProfileAgricultor = () => {
   const { usuario, logout } = useAuth();
 
@@ -107,13 +107,13 @@ export const ProfileAgricultor = () => {
   if (loading) return <p>Cargando perfil...</p>;
   if (!usuarioCompleto || !formData)
     return <p>No se pudieron cargar los datos.</p>;
-
+  if (!usuario) return null;
   return (
     <div className="flex h-screen bg-gray-50">
       <SidebarAgricultor
         sidebarOpen={sidebarOpen}
         setSidebarOpen={setSidebarOpen}
-        usuario={usuario}
+        usuario={usuario as Usuario}
         onCerrarSesion={handleCerrarSesion}
       />
 
@@ -125,7 +125,7 @@ export const ProfileAgricultor = () => {
           className="bg-white shadow-md sticky top-0 z-40"
         >
           <div className="px-6 py-4 flex items-center gap-3">
-            <Cloud className="w-8 h-8 text-green-600" />
+            <User className="w-8 h-8 text-green-600" />
             <h1 className="text-2xl font-bold text-gray-800">Mi Perfil</h1>
           </div>
         </motion.header>
@@ -135,13 +135,22 @@ export const ProfileAgricultor = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.4 }}
-            className="bg-white shadow-md rounded-lg p-6 max-w-2xl w-full"
+            className="bg-white shadow-md rounded-lg p-6 max-w-2xl w-full text-center"
           >
-            <h2 className="text-2xl font-bold mb-4 text-green-700">
+            <h2 className="text-2xl font-bold mb-2 text-green-700">
               Datos del Agricultor
             </h2>
 
-            <div className="grid grid-cols-1 gap-4 text-gray-700">
+            {/* Logo Circular CENTRADO */}
+            <div className="flex justify-center my-4">
+              <img
+                src={logo}
+                alt="Logo AgroClima"
+                className="w-28 h-28 rounded-full shadow-md object-cover border-4 border-green-300"
+              />
+            </div>
+
+            <div className="grid grid-cols-1 gap-4 text-gray-700 text-left mx-auto max-w-sm">
               <div>
                 <label className="font-semibold">Nombre:</label>
                 {editing ? (
@@ -152,7 +161,7 @@ export const ProfileAgricultor = () => {
                     onChange={handleChange}
                   />
                 ) : (
-                  <p>{usuarioCompleto.nombre}</p>
+                  <p className="text-center">{usuarioCompleto.nombre}</p>
                 )}
               </div>
 
@@ -166,7 +175,7 @@ export const ProfileAgricultor = () => {
                     onChange={handleChange}
                   />
                 ) : (
-                  <p>{usuarioCompleto.apellido}</p>
+                  <p className="text-center">{usuarioCompleto.apellido}</p>
                 )}
               </div>
 
@@ -180,7 +189,7 @@ export const ProfileAgricultor = () => {
                     onChange={handleChange}
                   />
                 ) : (
-                  <p>{usuarioCompleto.email}</p>
+                  <p className="text-center">{usuarioCompleto.email}</p>
                 )}
               </div>
 
@@ -194,17 +203,19 @@ export const ProfileAgricultor = () => {
                     onChange={handleChange}
                   />
                 ) : (
-                  <p>{usuarioCompleto.telefono}</p>
+                  <p className="text-center">{usuarioCompleto.telefono}</p>
                 )}
               </div>
 
               <div>
                 <label className="font-semibold">Rol:</label>
-                <p className="text-gray-500">{usuarioCompleto.rol}</p>
+                <p className="text-gray-500 text-center">
+                  {usuarioCompleto.rol}
+                </p>
               </div>
             </div>
 
-            <div className="mt-6 flex gap-3">
+            <div className="mt-6 flex gap-3 justify-center">
               {!editing ? (
                 <button
                   onClick={() => setEditing(true)}
