@@ -49,7 +49,7 @@ export default function NavBar() {
 
           {usuario ? (
             <Link
-              to="/dashboard"
+              to="/dashboard/agricultor"
               className="ml-2 px-4 py-2 bg-green-700 text-white rounded-md text-sm hover:bg-green-800 focus:outline-none focus:ring-2 focus:ring-green-300"
             >
               Dashboard
