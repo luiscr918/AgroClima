@@ -16,7 +16,10 @@ export const AppRoutes = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!usuario && !['/iniciar-sesion', '/', '/registro'].includes(window.location.pathname)) {
+    if (
+      !usuario &&
+      !["/iniciar-sesion", "/", "/registro"].includes(window.location.pathname)
+    ) {
       navigate("/iniciar-sesion");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -26,7 +29,6 @@ export const AppRoutes = () => {
     <Routes>
       {/* Rutas no protegidas */}
       <Route path="/" element={<HomePage />} />
-      <Route path="/dashboard" element={<DashboardAgricultor />} />
       <Route path="/configurar-terreno" element={<ConfigurarParcela />} />
       <Route path="/terreno/:id" element={<PanelParcela />} />
       <Route path="/iniciar-sesion" element={<IniciarSesion />} />

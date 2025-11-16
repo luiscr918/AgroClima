@@ -93,7 +93,7 @@ export const SidebarAgricultor = ({
         {/* Perfil */}
         <motion.button
           whileHover={{ x: 4 }}
-          onClick={() => navigate('/dashboard/agricultor')}
+          onClick={() => navigate('/perfil')}
           className="w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all text-gray-300 hover:text-white hover:bg-green-700 group"
           title={!sidebarOpen ? 'Perfil' : ''}
         >
