@@ -1,4 +1,4 @@
-import { Route, Routes, useNavigate } from "react-router-dom";
+import { Route, Routes } from "react-router-dom";
 import { HomePage } from "../pages/HomePage";
 import IniciarSesion from "../pages/login";
 import Registro from "../pages/registro";
@@ -8,36 +8,20 @@ import { ProtectedRoute } from "./ProtectedRoute";
 import { DashboardAgricultor } from "../pages/agricultor/DashboardAgricultor";
 import { NuevoTerreno } from "../pages/agricultor/NuevoTerreno";
 import { MisTerrenos } from "../pages/agricultor/MisTerrenos";
-import { useAuth } from "../context/useAuth";
-import { useEffect } from "react";
+import { Rol } from "../enums/Rol";
 
 export const AppRoutes = () => {
-  const { usuario } = useAuth();
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    if (
-      !usuario &&
-      !["/iniciar-sesion", "/", "/registro"].includes(window.location.pathname)
-    ) {
-      navigate("/iniciar-sesion");
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [usuario]);
-
   return (
     <Routes>
       {/* Rutas no protegidas */}
       <Route path="/" element={<HomePage />} />
-      <Route path="/configurar-terreno" element={<ConfigurarParcela />} />
-      <Route path="/terreno/:id" element={<PanelParcela />} />
       <Route path="/iniciar-sesion" element={<IniciarSesion />} />
       <Route path="/registro" element={<Registro />} />
       {/* Rutas protegidas por rol y login */}
       <Route
         path="/dashboard/agricultor"
         element={
-          <ProtectedRoute roles={["AGRICULTOR"]}>
+          <ProtectedRoute roles={[Rol.AGRICULTOR]}>
             <DashboardAgricultor />
           </ProtectedRoute>
         }
@@ -45,7 +29,7 @@ export const AppRoutes = () => {
       <Route
         path="/nuevo-terreno"
         element={
-          <ProtectedRoute roles={["AGRICULTOR"]}>
+          <ProtectedRoute roles={[Rol.AGRICULTOR]}>
             <NuevoTerreno />
           </ProtectedRoute>
         }
@@ -53,8 +37,24 @@ export const AppRoutes = () => {
       <Route
         path="/mis-terrenos"
         element={
-          <ProtectedRoute roles={["AGRICULTOR"]}>
+          <ProtectedRoute roles={[Rol.AGRICULTOR]}>
             <MisTerrenos />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/configurar-terreno"
+        element={
+          <ProtectedRoute roles={[Rol.AGRICULTOR]}>
+            <ConfigurarParcela />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/terreno/:id"
+        element={
+          <ProtectedRoute roles={[Rol.AGRICULTOR]}>
+            <PanelParcela />
           </ProtectedRoute>
         }
       />

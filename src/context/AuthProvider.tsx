@@ -69,11 +69,21 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
     return () => clearTimeout(timeout);
   }, [token]);
-  // ⚡ Efecto para cerrar sesión al cerrar la pestaña o recargar
+  // Cerrar sesión solo cuando se cierra la pestaña
   useEffect(() => {
-    const handleBeforeUnload = () => logout();
-    window.addEventListener("beforeunload", handleBeforeUnload);
-    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+    const handlePageHide = (event: PageTransitionEvent) => {
+      // Si la página se está recargando => NO cerrar sesión
+      if (event.persisted) return;
+
+      // Esto solo corre al cerrar la pestaña o salir del sitio
+      logout();
+    };
+
+    window.addEventListener("pagehide", handlePageHide);
+
+    return () => {
+      window.removeEventListener("pagehide", handlePageHide);
+    };
   }, []);
 
   return (

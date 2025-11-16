@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { SidebarAgricultor } from '../../components/SidebarAgricultor';
+import { useAuth } from '../../context/useAuth';
 
 interface Terreno {
   id: number;
@@ -22,33 +23,27 @@ interface Terreno {
 
 export const MisTerrenos = () => {
   const navigate = useNavigate();
-  const [usuario, setUsuario] = useState<any>(null);
+  const { usuario, logout } = useAuth();   // ✔ usa auth global
   const [terrenos, setTerrenos] = useState<Terreno[]>([]);
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
   useEffect(() => {
-    const usuarioGuardado = localStorage.getItem('user');
-    if (!usuarioGuardado) {
-      navigate('/iniciar-sesion');
-      return;
-    }
-    const usuarioData = JSON.parse(usuarioGuardado);
-    setUsuario(usuarioData);
+    if (!usuario) return;  // ✔ ahora NO te manda al login automáticamente
 
     // Cargar terrenos del usuario actual desde localStorage
     const terrenosGuardados: Terreno[] = JSON.parse(
       localStorage.getItem('terrenos') || '[]'
     );
     const terrenosDelUsuario = terrenosGuardados.filter(
-      (t) => t.usuario === usuarioData.email
+      (t) => t.usuario === usuario.email
     );
     setTerrenos(terrenosDelUsuario);
   }, [navigate]);
 
-  const handleCerrarSesion = () => {
-    localStorage.removeItem('user');
-    navigate('/iniciar-sesion');
-  };
+const handleCerrarSesion = () => {
+  logout();
+  navigate("/iniciar-sesion");
+};
 
   const handleEliminar = (id: number) => {
     const terrenosGuardados: Terreno[] = JSON.parse(

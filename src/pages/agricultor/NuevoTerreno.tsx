@@ -1,30 +1,30 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Cloud, Save, ArrowLeft } from 'lucide-react';
-import { motion } from 'framer-motion';
-import { SidebarAgricultor } from '../../components/SidebarAgricultor';
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { Cloud, Save, ArrowLeft } from "lucide-react";
+import { motion } from "framer-motion";
+import { SidebarAgricultor } from "../../components/SidebarAgricultor";
+import { useAuth } from "../../context/useAuth";
+
 
 export const NuevoTerreno = () => {
   const navigate = useNavigate();
-  const [usuario, setUsuario] = useState<any>(null);
+  const { usuario, logout } = useAuth(); // ✔ usamos tu auth global
   const [sidebarOpen, setSidebarOpen] = useState(true);
+
   const [formData, setFormData] = useState({
-    nombre: '',
-    tamanioHectareas: '',
-    ubicacion: '',
-    tipoSuelo: '',
+    nombre: "",
+    tamanioHectareas: "",
+    ubicacion: "",
+    tipoSuelo: "",
   });
+
   const [guardando, setGuardando] = useState(false);
-  const [mensajeExito, setMensajeExito] = useState('');
+  const [mensajeExito, setMensajeExito] = useState("");
 
   useEffect(() => {
-    const usuarioGuardado = localStorage.getItem('user');
-    if (!usuarioGuardado) {
-      navigate('/iniciar-sesion');
-      return;
-    }
-    setUsuario(JSON.parse(usuarioGuardado));
-  }, [navigate]);
+    // Si no hay usuario, ProtectedRoute se encarga, así que NO navegamos aquí
+    if (!usuario) return;
+  }, [usuario]);
 
   const handleInputChange = (
     e: React.ChangeEvent<
@@ -43,51 +43,50 @@ export const NuevoTerreno = () => {
     setGuardando(true);
 
     try {
-      // Validar campos requeridos
       if (
         !formData.nombre ||
         !formData.ubicacion ||
         !formData.tamanioHectareas ||
         !formData.tipoSuelo
       ) {
-        alert('Por favor completa todos los campos requeridos');
+        alert("Por favor completa todos los campos requeridos");
         setGuardando(false);
         return;
       }
 
-      // Simular delay de guardado
       await new Promise((resolve) => setTimeout(resolve, 800));
 
-      // Guardar terreno
       const nuevoTerreno = {
         id: Date.now(),
         nombre: formData.nombre,
         tamanioHectareas: parseFloat(formData.tamanioHectareas),
         ubicacion: formData.ubicacion,
         tipoSuelo: formData.tipoSuelo,
-        usuario: usuario?.email,
+        usuario: usuario?.email, // ✔ usuario real del context
       };
 
-      // Guardar en localStorage
-      const terrenos = JSON.parse(localStorage.getItem('terrenos') || '[]');
+      // GUARDADO REAL (CONTEXT + SESSIONSTORAGE)
+      const terrenos = JSON.parse(
+        sessionStorage.getItem("terrenos") || "[]"
+      );
       terrenos.push(nuevoTerreno);
-      localStorage.setItem('terrenos', JSON.stringify(terrenos));
+      sessionStorage.setItem("terrenos", JSON.stringify(terrenos));
 
-      setMensajeExito('¡Terreno creado exitosamente!');
+      setMensajeExito("¡Terreno creado exitosamente!");
       setTimeout(() => {
-        navigate('/mis-terrenos');
+        navigate("/mis-terrenos");
       }, 1500);
     } catch (error) {
-      console.error('Error al guardar:', error);
-      alert('Error al guardar el terreno');
+      console.error("Error al guardar:", error);
+      alert("Error al guardar el terreno");
     } finally {
       setGuardando(false);
     }
   };
 
   const handleCerrarSesion = () => {
-    localStorage.removeItem('user');
-    navigate('/iniciar-sesion');
+    logout(); // ✔ cerrar sesión correctamente
+    navigate("/iniciar-sesion");
   };
 
   return (
@@ -102,7 +101,6 @@ export const NuevoTerreno = () => {
 
       {/* Main Content */}
       <main className="flex-1 overflow-auto">
-        {/* Header */}
         <motion.header
           initial={{ y: -100 }}
           animate={{ y: 0 }}
@@ -112,7 +110,7 @@ export const NuevoTerreno = () => {
           <div className="px-6 py-4 flex items-center justify-between">
             <div className="flex items-center gap-3">
               <button
-                onClick={() => navigate('/dashboard/agricultor')}
+                onClick={() => navigate("/dashboard/agricultor")}
                 className="p-2 hover:bg-gray-100 rounded-lg transition"
               >
                 <ArrowLeft className="w-5 h-5 text-gray-600" />
@@ -125,7 +123,6 @@ export const NuevoTerreno = () => {
           </div>
         </motion.header>
 
-        {/* Content */}
         <div className="px-6 py-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -173,9 +170,9 @@ export const NuevoTerreno = () => {
                   />
                 </div>
 
-                {/* Área y Tipo de Suelo en fila */}
+                {/* Campos en fila */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {/* Tamaño en Hectáreas */}
+                  {/* Tamaño */}
                   <div>
                     <label className="block text-sm font-bold text-gray-700 mb-2">
                       Tamaño (hectáreas) *
@@ -191,7 +188,7 @@ export const NuevoTerreno = () => {
                     />
                   </div>
 
-                  {/* Tipo de Suelo */}
+                  {/* Tipo de suelo */}
                   <div>
                     <label className="block text-sm font-bold text-gray-700 mb-2">
                       Tipo de Suelo *
@@ -213,7 +210,7 @@ export const NuevoTerreno = () => {
                   </div>
                 </div>
 
-                {/* Mensaje de éxito */}
+                {/* Mensaje éxito */}
                 {mensajeExito && (
                   <motion.div
                     initial={{ opacity: 0 }}
@@ -224,7 +221,7 @@ export const NuevoTerreno = () => {
                   </motion.div>
                 )}
 
-                {/* Buttons */}
+                {/* Botones */}
                 <div className="flex gap-4 pt-6">
                   <motion.button
                     whileHover={{ scale: 1.02 }}
@@ -234,13 +231,14 @@ export const NuevoTerreno = () => {
                     className="flex-1 px-6 py-3 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <Save className="w-5 h-5" />
-                    {guardando ? 'Guardando...' : 'Crear Terreno'}
+                    {guardando ? "Guardando..." : "Crear Terreno"}
                   </motion.button>
+
                   <motion.button
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                     type="button"
-                    onClick={() => navigate('/dashboard/agricultor')}
+                    onClick={() => navigate("/dashboard/agricultor")}
                     className="flex-1 px-6 py-3 bg-gray-300 text-gray-800 rounded-lg font-medium hover:bg-gray-400 transition"
                   >
                     Cancelar
