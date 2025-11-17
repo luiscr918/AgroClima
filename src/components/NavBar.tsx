@@ -33,15 +33,15 @@ export default function NavBar() {
             Inicio
           </Link>
 
-          <a
-            href="/#features"
+          <Link
+            to="/guia"
             className="text-green-700 hover:underline focus:outline-none focus:ring-2 focus:ring-green-300 rounded"
           >
-            Funciones
-          </a>
+            Guía
+          </Link>
 
           <Link
-            to="/"
+            to="/contacto"
             className="text-green-700 hover:underline focus:outline-none focus:ring-2 focus:ring-green-300 rounded"
           >
             Contacto

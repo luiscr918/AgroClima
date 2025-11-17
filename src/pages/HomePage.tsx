@@ -83,11 +83,12 @@ export function HomePage() {
 						<div className="grid md:grid-cols-2 gap-8 items-center">
 							<motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.6 }}>
 								<h1 className="text-4xl md:text-5xl font-extrabold text-white drop-shadow-xl leading-tight">AgroClima</h1>
-								<p className="mt-4 max-w-xl text-lg text-white drop-shadow-md">Plataforma inteligente para ayudarte a adaptarte al cambio climático: clima, alertas y prácticas sostenibles en un solo lugar.</p>
+								<p className="mt-4 max-w-xl text-lg text-black drop-shadow-md">Herramienta digital para agricultores que permite registrar parcelas, monitorear cultivos, recibir pronósticos personalizados y acceder a recomendaciones inteligentes para enfrentar los desafíos del clima.
+</p>
 
 								<div className="mt-6 flex flex-wrap gap-3">
 									<Link to="/configurar-parcela" className="inline-flex items-center px-5 py-3 bg-green-800 text-white rounded-lg font-medium shadow hover:bg-green-900 focus:outline-none focus:ring-2 focus:ring-green-300">Comenzar ahora</Link>
-									<Link to="#features" className="inline-flex items-center px-4 py-3 border border-white/40 text-white rounded-lg hover:bg-white/10">Ver funciones</Link>
+									<Link to="#features" className="inline-flex items-center px-4 py-3 bg-white text-green-800 font-medium rounded-lg shadow hover:bg-green-50 focus:outline-none focus:ring-2 focus:ring-green-300">Ver funciones</Link>
 								</div>
 							</motion.div>
 
@@ -110,82 +111,118 @@ export function HomePage() {
 					</div>
 				</section>
 
-				{/* QUICK SEARCH + STATS */}
-				<section className="max-w-6xl mx-auto px-6 py-10">
-					<div className="grid md:grid-cols-3 gap-6 items-start">
-						<div className="md:col-span-2 bg-white rounded-xl p-6 shadow-sm">
-							<form
-								onSubmit={(e) => {
-									e.preventDefault();
-									alert(location ? `Buscando clima para ${location} (simulado)` : 'Introduce una ubicación');
-								}}
-								className="flex gap-2"
-							>
-								<input value={location} onChange={(e) => setLocation(e.target.value)} aria-label="Buscar ubicación" placeholder="Buscar por ciudad o código postal" className="flex-1 rounded-md border border-gray-200 px-3 py-2" />
-								<button type="submit" className="px-4 py-2 bg-green-700 text-white rounded-md">Buscar</button>
-							</form>
-							<div className="mt-4 text-sm text-gray-600">Prueba: "Valencia", "Sevilla" o tu código postal.</div>
-						</div>
+				
+{/* FEATURES */}
+<section id="features" className="max-w-6xl mx-auto px-6 py-16 relative">
 
-						<div className="grid grid-cols-2 md:grid-cols-1 gap-4">
-							{stats.map((s) => (
-								<StatCard key={s.label} label={s.label} value={s.value} />
-							))}
-						</div>
-					</div>
-				</section>
+  {/* Burbujas decorativas */}
+  <div className="absolute top-0 left-10 w-32 h-32 bg-green-100 rounded-full blur-3xl opacity-40 animate-pulse"></div>
+  <div className="absolute bottom-0 right-10 w-40 h-40 bg-green-200 rounded-full blur-3xl opacity-30 animate-pulse"></div>
 
-				{/* FEATURES */}
-				<section id="features" className="max-w-6xl mx-auto px-6 py-16">
-					<h2 className="text-3xl md:text-4xl font-bold text-center text-green-800 mb-10">¿Qué ofrece AgroClima?</h2>
+  <motion.h2
+    initial={{ opacity: 0, y: -10 }}
+    whileInView={{ opacity: 1, y: 0 }}
+    viewport={{ once: true }}
+    transition={{ duration: 0.7 }}
+    className="text-4xl font-extrabold text-center text-green-800 mb-12 drop-shadow-sm"
+  >
+    Herramientas que transforman tu campo
+  </motion.h2>
 
-					<div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6">
-						<FeatureCard
-							title="Clima en Tiempo Real"
-							desc="Datos actualizado sobre temperatura, humedad, viento y más, listos para tus decisiones diarias."
-							icon={Sun}
-							color="bg-yellow-50 text-yellow-600"
-						/>
+  <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-8 relative z-10">
+    {[
+      {
+        title: "Clima preciso por terreno",
+        desc: "Consulta datos exactos para tu parcela: lluvia, viento, humedad y más.",
+        icon: Sun,
+        color: "text-yellow-600 bg-yellow-100",
+      },
+      {
+        title: "Alertas de riesgo agrícola",
+        desc: "Heladas, tormentas, sequías y cambios bruscos… enterate antes que pase.",
+        icon: CloudRain,
+        color: "text-blue-600 bg-blue-100",
+      },
+      {
+        title: "Recomendaciones sostenibles",
+        desc: "IA que analiza tu cultivo y sugiere prácticas eficientes y ecológicas.",
+        icon: Leaf,
+        color: "text-green-600 bg-green-100",
+      },
+    ].map((f, i) => (
+      <motion.div
+        key={i}
+        initial={{ opacity: 0, y: 30 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ delay: i * 0.2, duration: 0.6 }}
+        whileHover={{ scale: 1.07 }}
+        className="rounded-2xl p-[1px] bg-gradient-to-br from-green-300 to-green-600 shadow-lg hover:shadow-xl"
+      >
+        <div className="bg-white rounded-2xl p-6 h-full flex flex-col gap-4">
+          <div className={`w-14 h-14 rounded-xl flex items-center justify-center ${f.color} shadow-md`}>
+            <f.icon size={28} />
+          </div>
 
-						<FeatureCard
-							title="Alertas Meteorológicas"
-							desc="Recibe notificaciones tempranas sobre eventos extremos para proteger tus cultivos y activos."
-							icon={CloudRain}
-							color="bg-blue-50 text-blue-600"
-						/>
+          <h3 className="text-xl font-semibold text-green-800">{f.title}</h3>
+          <p className="text-gray-600">{f.desc}</p>
+        </div>
+      </motion.div>
+    ))}
+  </div>
 
-						<FeatureCard
-							title="Prácticas Sostenibles"
-							desc="Consejos y guías para adaptar técnicas agrícolas que reduzcan riesgos climáticos."
-							icon={Leaf}
-							color="bg-green-50 text-green-600"
-						/>
-					</div>
+</section>
 
-					<div className="mt-10 flex justify-center">
-						<button className="px-6 py-3 bg-green-700 text-white rounded-lg shadow hover:bg-green-800">Explorar todas las herramientas</button>
-					</div>
-				</section>
+<section className="max-w-5xl mx-auto px-6 py-16">
+  <h2 className="text-3xl font-bold text-center text-green-800 mb-10">
+    Preguntas frecuentes
+  </h2>
 
-				{/* TESTIMONIALS */}
-				<section className="max-w-6xl mx-auto px-6 py-16">
-					<h2 className="text-3xl font-bold text-center text-green-800 mb-8">Lo que dicen nuestros usuarios</h2>
-					<div className="grid md:grid-cols-3 gap-6">
-						<Testimonial quote="Gracias a AgroClima evitamos pérdidas en la última tormenta: alertas precisas y a tiempo." by="María López, agricultora" />
-						<Testimonial quote="La información en tiempo real nos ayudó a programar riegos y ahorrar agua." by="Cooperativa Verde" />
-						<Testimonial quote="Fácil de usar y con recomendaciones prácticas." by="Pedro García, ingeniero agro" />
-					</div>
-				</section>
+  <div className="grid md:grid-cols-2 gap-6">
+    {[
+      {
+        q: "¿Qué puedo hacer en AgroClima?",
+        a: "Puedes registrar terrenos, gestionar siembras y cosechas, visualizar tu información agrícola en un solo panel y recibir análisis personalizados basados en clima.",
+      },
+      {
+        q: "¿Cómo funciona la inteligencia artificial en mis cultivos?",
+        a: "La IA analiza clima, historial de tus parcelas y patrones agrícolas para generar recomendaciones personalizadas, incluyendo riego, fertilización, fechas óptimas de siembra y alertas tempranas.",
+      },
+      {
+        q: "¿Qué necesito para usar AgroClima?",
+        a: "Solo registrarte, añadir tu parcela o terreno, indicar qué cultivos manejas y automáticamente comenzarás a recibir información adaptada a tu contexto.",
+      },
+      {
+        q: "¿Puedo ver datos históricos o pronósticos?",
+        a: "Sí. AgroClima ofrece pronósticos, clima en tiempo real y datos históricos que pueden ayudarte a planificar tus próximas actividades agrícolas.",
+      },
+    ].map((item, i) => (
+      <motion.div
+        key={i}
+        initial={{ opacity: 0, y: 30 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.5, delay: i * 0.15 }}
+        className="bg-white p-6 rounded-xl shadow-md border border-green-200 cursor-pointer hover:shadow-xl transition-all"
+      >
+        <details className="group">
+          <summary className="flex justify-between items-center font-medium text-green-800 cursor-pointer">
+            <span>{item.q}</span>
+            <span className="text-green-600 group-open:rotate-180 transition-transform">
+              ▼
+            </span>
+          </summary>
 
-				{/* FAQ */}
-				<section className="max-w-6xl mx-auto px-6 py-16">
-					<h2 className="text-3xl font-bold text-center text-green-800 mb-8">Preguntas frecuentes</h2>
-					<div className="max-w-3xl mx-auto">
-						<FaqItem i={1} q="¿Cómo conecto mi estación meteorológica?" a="Puedes conectar estaciones via API o integraciones soportadas; revisa la documentación para tu modelo." />
-						<FaqItem i={2} q="¿Las alertas son personalizables?" a="Sí, puedes configurar umbrales por cultivo, región y tipo de evento." />
-						<FaqItem i={3} q="¿Puedo exportar los datos?" a="Sí, exportamos en CSV y formatos compatibles con software agrícola." />
-					</div>
-				</section>
+          <p className="mt-3 text-gray-700 text-sm">
+            {item.a}
+          </p>
+        </details>
+      </motion.div>
+    ))}
+  </div>
+</section>
+
+
 
 				{/* NEWSLETTER CTA */}
 				<section className="bg-green-50 py-12">

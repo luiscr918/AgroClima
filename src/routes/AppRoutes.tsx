@@ -18,6 +18,8 @@ import { ConfigurarCultivo } from "../pages/agricultor/ConfigurarCultivo";
 import { MisSiembras } from "../pages/agricultor/MisSiembras";
 import { NuevaSiembra } from "../pages/agricultor/NuevaSiembra";
 import { ConfigurarSiembra } from "../pages/agricultor/ConfigurarSiembra";
+import GuiaPage from "../pages/agricultor/GuiaPage";
+import ContactoPage from "../pages/ContactoPage";
 
 export const AppRoutes = () => {
   return (
@@ -26,6 +28,8 @@ export const AppRoutes = () => {
       <Route path="/" element={<HomePage />} />
       <Route path="/iniciar-sesion" element={<IniciarSesion />} />
       <Route path="/registro" element={<Registro />} />
+      <Route path="/guia" element={<GuiaPage />} />
+      <Route path="/contacto" element={<ContactoPage />} />
       {/* Rutas protegidas por rol y login */}
       <Route
         path="/dashboard/agricultor"
@@ -123,6 +127,7 @@ export const AppRoutes = () => {
           </ProtectedRoute>
         }
       />
+
     </Routes>
   );
 };
