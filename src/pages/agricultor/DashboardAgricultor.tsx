@@ -232,33 +232,6 @@ export function DashboardAgricultor() {
                     </div>
                   </div>
 
-                  {/* Tarjetas de terrenos (igual que tenías) */}
-                  <div className="mb-8">
-                    <div className="mb-6">
-                      <h3 className="text-2xl font-bold text-gray-800">Mis Terrenos</h3>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                      {terrenos.map((terreno, idx) => (
-                        <motion.div key={terreno.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: idx * 0.1 }} whileHover={{ y: -4 }} className="bg-white rounded-lg shadow-md hover:shadow-lg transition overflow-hidden">
-                          <div className="bg-linear-to-r from-green-500 to-green-600 text-white p-4">
-                            <h4 className="font-bold text-lg">{terreno.nombre}</h4>
-                            <p className="flex items-center gap-1 text-sm opacity-90 mt-1">
-                              <MapPin className="w-4 h-4" />
-                              {terreno.ubicacion}
-                            </p>
-                          </div>
-
-                          <div className="p-4">
-                            <p className="text-gray-700 mb-4">Cultivos: {cultivos.filter((c) => c.terrenoId === terreno.id).length}</p>
-                            <button onClick={() => handleVerTerreno(terreno.id!)} className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition font-medium">
-                              Ver Detalles
-                            </button>
-                          </div>
-                        </motion.div>
-                      ))}
-                    </div>
-                  </div>
                 </>
               )}
             </motion.div>
