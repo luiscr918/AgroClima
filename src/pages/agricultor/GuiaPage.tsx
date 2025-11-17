@@ -14,7 +14,7 @@ export default function GuiaPage() {
     },
     {
       number: 2,
-      title: "Registra tu parcela",
+      title: "Registra tu Terreno",
       desc: "Ingresa la ubicación, extensión y cultivos que manejas para recibir recomendaciones personalizadas.",
       icon: MapPin,
       color: "bg-blue-100 text-blue-700",
@@ -44,7 +44,6 @@ export default function GuiaPage() {
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-b from-green-100 to-green-200 text-gray-800">
-      
       <NavBar />
 
       <main className="grow">
@@ -58,8 +57,9 @@ export default function GuiaPage() {
         </motion.h2>
 
         <p className="text-center text-gray-700 max-w-3xl mx-auto mb-12 text-lg">
-          Sigue estos pasos para aprovechar todas las herramientas que AgroClima 
-          ofrece a los agricultores para gestionar sus cultivos y adaptarse al cambio climático.
+          Sigue estos pasos para aprovechar todas las herramientas que AgroClima
+          ofrece a los agricultores para gestionar sus cultivos y adaptarse al
+          cambio climático.
         </p>
 
         <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-10 px-6 pb-20">
