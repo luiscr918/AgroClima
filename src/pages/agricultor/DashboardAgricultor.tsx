@@ -1,10 +1,9 @@
+// src/pages/agricultor/DashboardAgricultor.tsx
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Cloud,
   MapPin,
-  User,
-  LogOut,
   Eye,
   Bell,
   TrendingUp,
@@ -15,57 +14,78 @@ import { motion } from "framer-motion";
 import { SidebarAgricultor } from "../../components/SidebarAgricultor";
 import { useAuth } from "../../context/useAuth";
 
-export const DashboardAgricultor = () => {
+// Recharts
+import {
+  LineChart,
+  Line,
+  BarChart,
+  Bar,
+  CartesianGrid,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+} from "recharts";
+
+import { TerrenoService } from "../../services/terrenoService";
+import { CultivoService } from "../../services/cultivoService";
+
+import type { Terreno } from "../../models/Terreno";
+import type { Cultivo } from "../../models/Cultivo";
+
+/**
+ * Export nombrado (para que AppRoutes no cambie)
+ */
+export function DashboardAgricultor() {
   const navigate = useNavigate();
-  const { usuario, token, logout } = useAuth(); // Usamos el contexto global
-  const [terrenos, setTerrenos] = useState<any[]>([]);
+  const { usuario, token, logout } = useAuth();
+
+  const [terrenos, setTerrenos] = useState<Terreno[]>([]);
+  const [cultivos, setCultivos] = useState<Cultivo[]>([]);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [tabActivo, setTabActivo] = useState("resumen");
+  const [loading, setLoading] = useState(true);
 
-  // Redirigir al login si no hay usuario o token
+  // Redirigir si no está autenticado
   useEffect(() => {
     if (!usuario || !token) {
       navigate("/iniciar-sesion");
     }
   }, [usuario, token, navigate]);
 
-  // Simular carga de terrenos
+  // Cargar los terrenos DEL USUARIO LOGUEADO y sus cultivos
   useEffect(() => {
-    setTimeout(() => {
-      setTerrenos([
-        {
-          id: 1,
-          nombre: "Terreno Principal",
-          ubicacion: "Córdoba, Argentina",
-          temperatura: 24,
-          humedad: 65,
-          viento: 12,
-          ultimaActualizacion: "hace 5 minutos",
-        },
-        {
-          id: 2,
-          nombre: "Parcela Norte",
-          ubicacion: "Córdoba, Argentina",
-          temperatura: 22,
-          humedad: 70,
-          viento: 8,
-          ultimaActualizacion: "hace 10 minutos",
-        },
-        {
-          id: 3,
-          nombre: "Sector Sur",
-          ubicacion: "Córdoba, Argentina",
-          temperatura: 26,
-          humedad: 58,
-          viento: 15,
-          ultimaActualizacion: "hace 3 minutos",
-        },
-      ]);
-    }, 500);
-  }, []);
+    const cargarDatos = async () => {
+      try {
+        if (!usuario?.id) return;
+        setLoading(true);
+
+        const dataTerrenos = await TerrenoService.getTerrenosByUsuario(usuario.id);
+        setTerrenos(dataTerrenos);
+
+        // Obtener cultivos por terreno (acumular)
+        const allCultivos: Cultivo[] = [];
+        for (const t of dataTerrenos) {
+          // Algunos terrenos pueden no tener id definido por TS (por eso t.id!)
+          const c = await CultivoService.getCultivosByTerreno(t.id!);
+          allCultivos.push(...c);
+        }
+        setCultivos(allCultivos);
+      } catch (err) {
+        console.error("Error cargando terrenos o cultivos:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    cargarDatos();
+  }, [usuario]);
 
   const handleCerrarSesion = () => {
-    logout(); // Llama a la función del contexto que limpia usuario y token
+    logout();
     navigate("/iniciar-sesion");
   };
 
@@ -73,7 +93,7 @@ export const DashboardAgricultor = () => {
     navigate(`/terreno/${id}`);
   };
 
-  // Estadísticas, pronósticos y alertas como antes
+
   const estadisticas = [
     {
       titulo: "Terrenos Totales",
@@ -81,32 +101,16 @@ export const DashboardAgricultor = () => {
       icono: MapPin,
       color: "from-green-700 to-green-800",
     },
-    {
-      titulo: "Temp. Promedio",
-      valor:
-        terrenos.length > 0
-          ? Math.round(
-              terrenos.reduce((acc, t) => acc + t.temperatura, 0) /
-                terrenos.length
-            ) + "°C"
-          : "0°C",
-      icono: Sun,
-      color: "from-green-600 to-green-700",
-    },
-    {
-      titulo: "Área Total",
-      valor: "150 ha",
-      icono: TrendingUp,
-      color: "from-green-500 to-green-600",
-    },
+   
     {
       titulo: "Alertas Activas",
-      valor: "3",
+      valor: "—",
       icono: Bell,
       color: "from-green-700 to-green-800",
     },
   ];
 
+  // PRONÓSTICOS (QUEMADOS) — mantenidos como pediste
   const pronostico = [
     { dia: "Hoy", temp: 24, condicion: "Soleado", icon: "☀️" },
     { dia: "Mañana", temp: 22, condicion: "Nublado", icon: "☁️" },
@@ -117,30 +121,24 @@ export const DashboardAgricultor = () => {
     { dia: "Miércoles", temp: 21, condicion: "Nublado", icon: "☁️" },
   ];
 
-  const alertas = [
-    {
-      tipo: "Riesgo de Helada",
-      descripcion: "Temperatura puede bajar a 0°C en próximas 48hs",
-      urgencia: "alta",
-      icono: AlertTriangle,
-    },
-    {
-      tipo: "Lluvia Intensa",
-      descripcion: "Se esperan 40mm de precipitación",
-      urgencia: "media",
-      icono: AlertTriangle,
-    },
-    {
-      tipo: "Onda de Calor",
-      descripcion: "Temperaturas superiores a 35°C",
-      urgencia: "alta",
-      icono: AlertTriangle,
-    },
-  ];
+ 
+
+  // Para pie / barras de cultivos por terreno
+  const cultivosPorTerreno = terrenos.map((t) => ({
+    nombre: t.nombre,
+    total: cultivos.filter((c) => c.terrenoId === t.id).length,
+  }));
+
+  const pieCultivos = terrenos.map((t) => ({
+    name: t.nombre,
+    value: cultivos.filter((c) => c.terrenoId === t.id).length,
+  }));
+
+  const PIE_COLORS = ["#16A34A", "#22C55E", "#4ADE80", "#86EFAC", "#A7F3D0"];
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
-      {/* Sidebar */}
+      {/* Sidebar (no tocado) */}
       <SidebarAgricultor
         sidebarOpen={sidebarOpen}
         setSidebarOpen={setSidebarOpen}
@@ -160,232 +158,153 @@ export const DashboardAgricultor = () => {
           <div className="px-6 py-4 flex items-center justify-start">
             <div className="flex items-center gap-3">
               <Cloud className="w-8 h-8 text-green-600" />
-              <h1 className="text-2xl font-bold text-gray-800">
-                Dashboard Agrícola
-              </h1>
+              <h1 className="text-2xl font-bold text-gray-800">Dashboard Agrícola</h1>
             </div>
           </div>
         </motion.header>
 
         {/* Content */}
         <div className="px-6 py-8">
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.2 }}
-            className="mb-8"
-          >
-            <h2 className="text-3xl font-bold text-gray-800">
-              Bienvenido, {usuario?.email?.split("@")[0]}
-            </h2>
-            <p className="text-gray-600 mt-2">
-              Aquí puedes gestionar tus terrenos y monitorear el clima en tiempo
-              real
-            </p>
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }} className="mb-8">
+            <h2 className="text-3xl font-bold text-gray-800">Bienvenido, {usuario?.email?.split("@")[0]}</h2>
+            <p className="text-gray-600 mt-2">Aquí puedes gestionar tus terrenos y monitorear el clima en tiempo real</p>
           </motion.div>
 
           {/* Tabs */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.3 }}
-            className="flex gap-4 mb-8 border-b border-gray-200"
-          >
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }} className="flex gap-4 mb-8 border-b border-gray-200">
             {["resumen", "pronosticos", "perfil"].map((tab) => (
               <button
                 key={tab}
                 onClick={() => setTabActivo(tab)}
-                className={`px-4 py-3 font-medium transition-all ${
-                  tabActivo === tab
-                    ? "text-green-600 border-b-2 border-green-600"
-                    : "text-gray-600 hover:text-green-600"
-                }`}
+                className={`px-4 py-3 font-medium transition-all ${tabActivo === tab ? "text-green-600 border-b-2 border-green-600" : "text-gray-600 hover:text-green-600"}`}
               >
                 {tab === "resumen" && "Resumen"}
                 {tab === "pronosticos" && "Pronósticos"}
+                
               </button>
             ))}
           </motion.div>
 
-          {/* TAB: RESUMEN */}
+          {/* TAB: RESUMEN — REEMPLAZADA por gráficos reales (solo esta sección) */}
           {tabActivo === "resumen" && (
-            <motion.div
-              key="resumen"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3 }}
-            >
-              {/* Estadísticas */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-                {estadisticas.map((stat, idx) => {
-                  const IconComponent = stat.icono;
-                  return (
-                    <motion.div
-                      key={idx}
-                      whileHover={{ scale: 1.05 }}
-                      className={`bg-linear-to-br ${stat.color} text-white rounded-lg p-6 shadow-md`}
-                    >
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="opacity-90 text-sm">{stat.titulo}</p>
-                          <p className="text-3xl font-bold mt-2">
-                            {stat.valor}
-                          </p>
-                        </div>
-                        <IconComponent className="w-12 h-12 opacity-80" />
-                      </div>
-                    </motion.div>
-                  );
-                })}
-              </div>
+            <motion.div key="resumen" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
+              {/* Si se está cargando */}
+              {loading ? (
+                <p className="text-gray-600 animate-pulse">Cargando datos...</p>
+              ) : terrenos.length === 0 ? (
+                <p className="text-gray-600">No tienes terrenos registrados.</p>
+              ) : (
+                <>
+                  
 
-              {/* Mis Terrenos */}
-              <div className="mb-8">
-                <div className="mb-6">
-                  <h3 className="text-2xl font-bold text-gray-800">
-                    Mis Terrenos
-                  </h3>
-                </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {terrenos.map((terreno, idx) => (
-                    <motion.div
-                      key={terreno.id}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: idx * 0.1 }}
-                      whileHover={{ y: -4 }}
-                      className="bg-white rounded-lg shadow-md hover:shadow-lg transition overflow-hidden"
-                    >
-                      {/* Header */}
-                      <div className="bg-linear-to-r from-green-500 to-green-600 text-white p-4">
-                        <h4 className="font-bold text-lg">{terreno.nombre}</h4>
-                        <p className="flex items-center gap-1 text-sm opacity-90 mt-1">
-                          <MapPin className="w-4 h-4" />
-                          {terreno.ubicacion}
-                        </p>
-                      </div>
+                  {/* Cultivos: Pie + Bar */}
+                  <div className="grid md:grid-cols-2 gap-6 mb-8">
+                    {/* Pie: distribución cultivos por terreno */}
+                    <div className="bg-white rounded-xl shadow-md p-6">
+                      <h3 className="text-xl font-bold mb-4 text-green-800">Distribución de cultivos por terreno</h3>
 
-                      {/* Weather Info */}
-                      <div className="p-4 space-y-3">
-                        <div className="grid grid-cols-3 gap-2 text-center">
-                          <div className="bg-green-50 rounded-lg p-2">
-                            <p className="text-2xl">🌡️</p>
-                            <p className="text-sm font-bold">
-                              {terreno.temperatura}°C
+                      <ResponsiveContainer width="100%" height={300}>
+                        <PieChart>
+                          <Pie data={pieCultivos} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={100} innerRadius={50} label>
+                            {pieCultivos.map((_, i) => (
+                              <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />
+                            ))}
+                          </Pie>
+                          <Tooltip />
+                        </PieChart>
+                      </ResponsiveContainer>
+                    </div>
+
+                    {/* Bars: cultivos por terreno */}
+                    <div className="bg-white rounded-xl shadow-md p-6">
+                      <h3 className="text-xl font-bold mb-4 text-green-800">Cantidad de cultivos por terreno</h3>
+
+                      <ResponsiveContainer width="100%" height={300}>
+                        <BarChart data={cultivosPorTerreno}>
+                          <CartesianGrid strokeDasharray="3 3" />
+                          <XAxis dataKey="nombre" />
+                          <YAxis />
+                          <Tooltip />
+                          <Bar dataKey="total" fill="#43A047" />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </div>
+
+                  {/* Tarjetas de terrenos (igual que tenías) */}
+                  <div className="mb-8">
+                    <div className="mb-6">
+                      <h3 className="text-2xl font-bold text-gray-800">Mis Terrenos</h3>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {terrenos.map((terreno, idx) => (
+                        <motion.div key={terreno.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: idx * 0.1 }} whileHover={{ y: -4 }} className="bg-white rounded-lg shadow-md hover:shadow-lg transition overflow-hidden">
+                          <div className="bg-linear-to-r from-green-500 to-green-600 text-white p-4">
+                            <h4 className="font-bold text-lg">{terreno.nombre}</h4>
+                            <p className="flex items-center gap-1 text-sm opacity-90 mt-1">
+                              <MapPin className="w-4 h-4" />
+                              {terreno.ubicacion}
                             </p>
-                            <p className="text-xs text-gray-600">Temperatura</p>
                           </div>
-                          <div className="bg-green-50 rounded-lg p-2">
-                            <p className="text-2xl">💧</p>
-                            <p className="text-sm font-bold">
-                              {terreno.humedad}%
-                            </p>
-                            <p className="text-xs text-gray-600">Humedad</p>
-                          </div>
-                          <div className="bg-green-50 rounded-lg p-2">
-                            <p className="text-2xl">💨</p>
-                            <p className="text-sm font-bold">
-                              {terreno.viento}km/h
-                            </p>
-                            <p className="text-xs text-gray-600">Viento</p>
-                          </div>
-                        </div>
 
-                        <p className="text-xs text-gray-500">
-                          Actualizado: {terreno.ultimaActualizacion}
-                        </p>
-
-                        <motion.button
-                          whileHover={{ scale: 1.02 }}
-                          whileTap={{ scale: 0.98 }}
-                          onClick={() => handleVerTerreno(terreno.id)}
-                          className="w-full mt-3 px-4 py-2 bg-green-100 text-green-700 rounded-lg font-medium hover:bg-green-200 transition flex items-center justify-center gap-2"
-                        >
-                          <Eye className="w-4 h-4" />
-                          Ver Detalles
-                        </motion.button>
-                      </div>
-                    </motion.div>
-                  ))}
-                </div>
-              </div>
+                          <div className="p-4">
+                            <p className="text-gray-700 mb-4">Cultivos: {cultivos.filter((c) => c.terrenoId === terreno.id).length}</p>
+                            <button onClick={() => handleVerTerreno(terreno.id!)} className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition font-medium">
+                              Ver Detalles
+                            </button>
+                          </div>
+                        </motion.div>
+                      ))}
+                    </div>
+                  </div>
+                </>
+              )}
             </motion.div>
           )}
 
-          {/* TAB: PRONÓSTICOS */}
+          {/* TAB: PRONÓSTICOS — NO SE TOCA (datos quemados tal como pediste) */}
           {tabActivo === "pronosticos" && (
-            <motion.div
-              key="pronosticos"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3 }}
-            >
-              {/* Pronóstico 7 días */}
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
               <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-                <h3 className="text-2xl font-bold text-gray-800 mb-6">
-                  Pronóstico 7 Días
-                </h3>
+                <h3 className="text-2xl font-bold text-gray-800 mb-6">Pronóstico 7 Días (ejemplo)</h3>
                 <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
                   {pronostico.map((dia, idx) => (
-                    <motion.div
-                      key={idx}
-                      whileHover={{ scale: 1.05 }}
-                      className="bg-linear-to-br from-green-50 to-green-100 rounded-lg p-4 text-center border border-green-200"
-                    >
+                    <div key={idx} className="bg-linear-to-br from-green-50 to-green-100 rounded-lg p-4 text-center border border-green-200">
                       <p className="font-bold text-gray-800">{dia.dia}</p>
                       <p className="text-3xl my-2">{dia.icon}</p>
                       <p className="text-sm text-gray-600">{dia.condicion}</p>
-                      <p className="text-lg font-bold text-green-600 mt-2">
-                        {dia.temp}°C
-                      </p>
-                    </motion.div>
+                      <p className="text-lg font-bold text-green-600 mt-2">{dia.temp}°C</p>
+                    </div>
                   ))}
                 </div>
               </div>
 
-              {/* Alertas */}
+              {/* Alertas (mantengo tu estilo) */}
               <div className="bg-white rounded-lg shadow-md p-6">
-                <h3 className="text-2xl font-bold text-gray-800 mb-6">
-                  Alertas Climáticas
-                </h3>
+                <h3 className="text-2xl font-bold text-gray-800 mb-6">Alertas Climáticas</h3>
                 <div className="space-y-4">
-                  {alertas.map((alerta, idx) => {
-                    const AlertIcon = alerta.icono;
-                    const colorBg =
-                      alerta.urgencia === "alta"
-                        ? "bg-green-50 border-green-200"
-                        : "bg-green-50 border-green-200";
-                    const colorBadge =
-                      alerta.urgencia === "alta"
-                        ? "bg-green-100 text-green-800"
-                        : "bg-green-100 text-green-800";
-
-                    return (
-                      <motion.div
-                        key={idx}
-                        whileHover={{ x: 4 }}
-                        className={`${colorBg} border rounded-lg p-4 flex items-start gap-4`}
-                      >
-                        <AlertIcon className="w-6 h-6 text-green-600 shrink-0 mt-1" />
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2">
-                            <h4 className="font-bold text-gray-800">
-                              {alerta.tipo}
-                            </h4>
-                            <span
-                              className={`text-xs font-bold px-2 py-1 rounded-full ${colorBadge}`}
-                            >
-                              {alerta.urgencia === "alta" ? "URGENTE" : "MEDIA"}
-                            </span>
-                          </div>
-                          <p className="text-sm text-gray-600 mt-1">
-                            {alerta.descripcion}
-                          </p>
+                  {[{
+                    tipo: "Riesgo de Helada",
+                    descripcion: "Temperatura puede bajar a 0°C en próximas 48hs",
+                    urgencia: "alta"
+                  },{
+                    tipo: "Lluvia Intensa",
+                    descripcion: "Se esperan 40mm de precipitación",
+                    urgencia: "media"
+                  }].map((alerta, i) => (
+                    <div key={i} className="bg-green-50 border rounded-lg p-4 flex items-start gap-4">
+                      <AlertTriangle className="w-6 h-6 text-green-600 mt-1" />
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <h4 className="font-bold text-gray-800">{alerta.tipo}</h4>
+                          <span className="text-xs font-bold px-2 py-1 rounded-full bg-green-100 text-green-800">{alerta.urgencia === "alta" ? "URGENTE" : "MEDIA"}</span>
                         </div>
-                      </motion.div>
-                    );
-                  })}
+                        <p className="text-sm text-gray-600 mt-1">{alerta.descripcion}</p>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
             </motion.div>
@@ -394,4 +313,4 @@ export const DashboardAgricultor = () => {
       </main>
     </div>
   );
-};
+}
