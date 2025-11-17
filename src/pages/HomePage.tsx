@@ -205,7 +205,7 @@ export function HomePage() {
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.2, duration: 0.6 }}
                 whileHover={{ scale: 1.07 }}
-                className="rounded-2xl p-[1px] bg-gradient-to-br from-green-300 to-green-600 shadow-lg hover:shadow-xl"
+                className="rounded-2xl p-px bg-linear-to-br from-green-300 to-green-600 shadow-lg hover:shadow-xl"
               >
                 <div className="bg-white rounded-2xl p-6 h-full flex flex-col gap-4">
                   <div

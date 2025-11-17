@@ -43,7 +43,8 @@ export default function GuiaPage() {
   ];
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-b from-green-100 to-green-200 text-gray-800">
+    <div className="min-h-screen flex flex-col bg-linear-to-b from-green-100 to-green-200 text-gray-800">
+      
       <NavBar />
 
       <main className="grow">
@@ -57,9 +58,8 @@ export default function GuiaPage() {
         </motion.h2>
 
         <p className="text-center text-gray-700 max-w-3xl mx-auto mb-12 text-lg">
-          Sigue estos pasos para aprovechar todas las herramientas que AgroClima
-          ofrece a los agricultores para gestionar sus cultivos y adaptarse al
-          cambio climático.
+          Sigue estos pasos para aprovechar todas las herramientas que AgroClima 
+          ofrece a los agricultores para gestionar sus cultivos y adaptarse al cambio climático.
         </p>
 
         <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-10 px-6 pb-20">
