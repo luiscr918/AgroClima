@@ -1,27 +1,27 @@
-import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { Eye, EyeOff, Mail, Lock } from 'lucide-react';
-import { motion } from 'framer-motion';
-import { AxiosError } from 'axios';
-import NavBar from '../components/NavBar';
-import Footer from '../components/Footer';
+import { useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import { Eye, EyeOff, Mail, Lock } from "lucide-react";
+import { motion } from "framer-motion";
+import { AxiosError } from "axios";
+import NavBar from "../components/NavBar";
+import Footer from "../components/Footer";
 
-import type { AuthRequest } from '../models/AuthRequest';
-import { useAuth } from '../context/useAuth';
+import type { AuthRequest } from "../models/AuthRequest";
+import { useAuth } from "../context/useAuth";
 
 export default function IniciarSesion() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [cargando, setCargando] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const navigate = useNavigate();
 
   const { login } = useAuth(); // usar context para login global
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setError('');
+    setError("");
     setCargando(true);
 
     try {
@@ -29,18 +29,20 @@ export default function IniciarSesion() {
       await login(credentials); // llama a tu authService y guarda token/usuario
 
       // Redirección según rol (ejemplo)
-      const usuario = JSON.parse(localStorage.getItem('usuario') || '{}');
+      const usuario = JSON.parse(localStorage.getItem("usuario") || "{}");
       if (usuario.rol === "AGRICULTOR") {
-        navigate('/dashboard/agricultor');
+        navigate("/dashboard/agricultor");
       } else if (usuario.rol === "ADMIN") {
-        navigate('/dashboard/admin');
+        navigate("/dashboard/admin");
       } else {
-        navigate('/'); // cliente u otro rol
+        navigate("/"); // cliente u otro rol
       }
     } catch (err: unknown) {
       console.error(err);
       const axiosError = err as AxiosError<{ error: string }>;
-      setError(axiosError.response?.data?.error || 'Email o contraseña inválidos');
+      setError(
+        axiosError.response?.data?.error || "Email o contraseña inválidos"
+      );
     } finally {
       setCargando(false);
     }
@@ -71,7 +73,9 @@ export default function IniciarSesion() {
             <form onSubmit={handleSubmit} className="space-y-4">
               {/* Email */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Email
+                </label>
                 <div className="relative">
                   <Mail className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
                   <input
@@ -87,11 +91,13 @@ export default function IniciarSesion() {
 
               {/* Password */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Contraseña</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Contraseña
+                </label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
                   <input
-                    type={showPassword ? 'text' : 'password'}
+                    type={showPassword ? "text" : "password"}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••"
@@ -103,7 +109,11 @@ export default function IniciarSesion() {
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute right-3 top-3 text-gray-400 hover:text-gray-600"
                   >
-                    {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                    {showPassword ? (
+                      <EyeOff className="w-5 h-5" />
+                    ) : (
+                      <Eye className="w-5 h-5" />
+                    )}
                   </button>
                 </div>
               </div>
@@ -113,20 +123,20 @@ export default function IniciarSesion() {
                 disabled={cargando}
                 className="w-full mt-6 px-4 py-3 bg-green-700 text-white rounded-lg font-medium hover:bg-green-800 disabled:bg-gray-400 transition"
               >
-                {cargando ? 'Iniciando sesión...' : 'Iniciar Sesión'}
+                {cargando ? "Iniciando sesión..." : "Iniciar Sesión"}
               </button>
             </form>
 
             <div className="mt-6 text-center space-y-2">
               <p className="text-sm text-gray-600">
-                ¿No tienes cuenta?{' '}
-                <Link to="/registro" className="text-green-700 hover:text-green-800 font-medium">
+                ¿No tienes cuenta?{" "}
+                <Link
+                  to="/registro"
+                  className="text-green-700 hover:text-green-800 font-medium"
+                >
                   Regístrate aquí
                 </Link>
               </p>
-              <button className="text-sm text-gray-600 hover:text-gray-800">
-                ¿Olvidaste tu contraseña?
-              </button>
             </div>
           </div>
         </motion.div>
